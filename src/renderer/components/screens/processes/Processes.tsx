@@ -1,31 +1,40 @@
 import { Box, Stack, Typography } from '@mui/material';
 import { useMemo } from 'react';
 
-import ProcessItem from './components/ProcessItem';
+import { prepareILikeRegexp } from '../../../utils/ilike';
 
-import { ilike } from '../../../utils/ilike';
+import ProcessGroup from './components/ProcessGroup/ProcessGroup';
 
 import useAppState from '../../../contexts/app-state/useAppState';
 import { useWindowSize } from '../../../hooks/useWindowSize';
 
+import { Process } from '../../../../common/types';
+
 function Processes() {
-  const { appState, updateSelectedProcesses } = useAppState();
+  const { appState } = useAppState();
   const { height } = useWindowSize();
 
-  const handleSelectProcess = (processName: string) => {
-    updateSelectedProcesses(processName);
-  };
-
   const processesList = useMemo(() => {
-    const filtered = appState.processes.filter((process) =>
-      ilike(process.name, `%${appState.processesSearch}%`),
+    const iLikeRegexp = prepareILikeRegexp(`%${appState.processesSearch}%`);
+
+    const filteredProcesses = Object.entries(appState.processes).reduce(
+      (acc, [name, processes]) => {
+        if (
+          processes.some((process) => iLikeRegexp.test(process.description))
+        ) {
+          acc[name] = processes;
+        }
+
+        return acc;
+      },
+      {} as Record<string, Process[]>,
     );
 
-    return filtered;
+    return filteredProcesses;
   }, [appState.processes, appState.processesSearch]);
 
   return (
-    <Stack flex={1} direction="column" gap="24px" sx={{ userSelect: 'none' }}>
+    <Stack flex={1} direction="column" gap="8px" sx={{ userSelect: 'none' }}>
       <Typography variant="h5" fontWeight="bold">
         Processes
       </Typography>
@@ -49,12 +58,11 @@ function Processes() {
           },
         })}
       >
-        {processesList.map((process) => (
-          <ProcessItem
-            key={process.pid}
-            processName={process.name}
-            onProcessSelect={handleSelectProcess}
-            isSelected={appState.selectedProcesses.includes(process.name)}
+        {Object.entries(processesList).map(([processName, processes]) => (
+          <ProcessGroup
+            key={processName}
+            processName={processName}
+            processes={processes}
           />
         ))}
       </Box>

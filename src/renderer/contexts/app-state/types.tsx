@@ -1,5 +1,5 @@
 import { createContext } from 'react';
-import { PreferredTheme, Process } from '../../../main/types';
+import { PreferredTheme, Process } from '../../../common/types';
 
 export interface AppSettings {
   muteKeyBind: string;
@@ -8,7 +8,7 @@ export interface AppSettings {
 }
 
 interface AppState {
-  processes: Process[];
+  processes: Record<string, Process[]>;
   selectedProcesses: string[];
   processesSearch: string;
 }
@@ -30,7 +30,7 @@ export const defaultValue: IAppStateContext = {
     onStartup: true,
   },
   appState: {
-    processes: [],
+    processes: {},
     selectedProcesses: [],
     processesSearch: '',
   },

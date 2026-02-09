@@ -11,8 +11,9 @@ import {
 import React, { useEffect, useState } from 'react';
 
 import useAppState from '../../../contexts/app-state/useAppState';
-import { PreferredTheme } from '../../../../main/types';
 import { useWindowSize } from '../../../hooks/useWindowSize';
+
+import { PreferredTheme } from '../../../../common/types';
 
 const allowedFKeys = Array.from({ length: 12 }, (_, i) => `F${i + 1}`);
 const allowedLetters = /^[A-Z]$/;
@@ -87,7 +88,7 @@ function Settings() {
   }, [isRecordingKeyBind]);
 
   return (
-    <Stack flex={1} direction="column" gap="24px" sx={{ userSelect: 'none' }}>
+    <Stack flex={1} direction="column" gap="12px" sx={{ userSelect: 'none' }}>
       <Typography variant="h5" fontWeight="bold">
         Settings
       </Typography>

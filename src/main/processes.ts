@@ -1,5 +1,5 @@
 import { PowerShell } from './powershell';
-import { Process } from './types';
+import { Process } from '../common/types';
 
 export default class ProcessManager {
   private powershell: PowerShell;
@@ -9,22 +9,29 @@ export default class ProcessManager {
   }
 
   async get(): Promise<Process[]> {
-    const stdout = await this.powershell.run(
-      'Get-Process | Select-Object Id, ProcessName, MainWindowTitle | ConvertTo-Csv -NoTypeInformation',
-    );
+    const command = `
+      [Console]::OutputEncoding = [System.Text.Encoding]::UTF8;
+      Get-Process | Select-Object Id, ProcessName, MainWindowTitle, Path, Description, Product | ConvertTo-Csv -NoTypeInformation
+    `;
+
+    const stdout = await this.powershell.run(command);
 
     const lines = stdout.trim().split(/\r?\n/);
-    const processes = lines.slice(1).map((line) => {
-      const [Id, ProcessName, MainWindowTitle] = line
-        .replace(/"/g, '')
-        .split(',');
+    const processes = await Promise.all(
+      lines.slice(1).map(async (line) => {
+        const [Id, ProcessName, MainWindowTitle, Path, Description] = line
+          .replace(/"/g, '')
+          .split(',');
 
-      return {
-        pid: parseInt(Id),
-        name: ProcessName,
-        title: MainWindowTitle,
-      };
-    });
+        return {
+          pid: parseInt(Id),
+          name: ProcessName,
+          title: MainWindowTitle,
+          path: Path,
+          description: Description,
+        };
+      }),
+    );
 
     return processes;
   }

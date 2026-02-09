@@ -8,7 +8,7 @@ import {
   nativeTheme,
   shell,
   TitleBarOverlayOptions,
-  Tray,
+  protocol,
 } from 'electron';
 import path from 'path';
 
@@ -19,7 +19,7 @@ import { state } from './state';
 import TrayBuilder from './tray';
 import ProcessManager from './processes';
 import { MuteHelper } from './mute-helper';
-import { PreferredTheme } from './types';
+import { PreferredTheme, Process } from '../common/types';
 
 const gotTheLock = app.requestSingleInstanceLock();
 
@@ -210,6 +210,26 @@ app.on('second-instance', () => {
 app
   .whenReady()
   .then(async () => {
+    protocol.handle('icon', async (request) => {
+      try {
+        const url = new URL(request.url);
+
+        const filePath = decodeURIComponent(url.hostname + url.pathname);
+
+        const icon = await app.getFileIcon(filePath, { size: 'large' });
+        const pngBuffer = icon.toPNG();
+
+        return new Response(new Uint8Array(pngBuffer), {
+          headers: { 'Content-Type': 'image/png' },
+        });
+      } catch (e) {
+        console.error(e);
+        return new Response(null, {
+          status: 404,
+        });
+      }
+    });
+
     updateProcessesList();
     setInterval(updateProcessesList, 2000);
 
@@ -311,11 +331,29 @@ async function updateProcessesList() {
   state.processes = processes;
 
   if (mainWindow) {
-    const activeProcesses = state.processes.filter((process) =>
-      Boolean(process.title),
+    const allowedProcesses = state.processes.filter(
+      (process) => Boolean(process.title) && Boolean(process.description),
     );
 
-    mainWindow.webContents.send('processes-update', activeProcesses);
+    const processesMap: Record<string, Process[]> = {};
+
+    state.processes.forEach((process) => {
+      const isAllowed = allowedProcesses.some(
+        (allowedProcess) => allowedProcess.name === process.name,
+      );
+
+      if (!isAllowed) {
+        return;
+      }
+
+      if (processesMap[process.name]) {
+        return processesMap[process.name].push(process);
+      }
+
+      processesMap[process.name] = [process];
+    });
+
+    mainWindow.webContents.send('processes-update', processesMap);
   }
 }
 

@@ -1,12 +1,7 @@
-export function ilike(str: string, pattern: string) {
-  // Escape regex special characters except for %
+export function prepareILikeRegexp(pattern: string): RegExp {
   const escaped = pattern.replace(/[-\/\\^$+?.()|[\]{}]/g, '\\$&');
 
-  // Replace SQL wildcard % with regex wildcard .*
-  const regexPattern = `^${escaped.replace(/%/g, '.*')}$`;
+  const regexpPattern = `^${escaped.replace(/%/g, '.*')}$`;
 
-  // Create regex with case-insensitive flag
-  const regex = new RegExp(regexPattern, 'i');
-
-  return regex.test(str);
+  return new RegExp(regexpPattern, 'i');
 }

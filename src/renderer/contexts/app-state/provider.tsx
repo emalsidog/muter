@@ -7,10 +7,10 @@ import {
 } from 'react';
 
 import { AppSettings, AppStateContext, defaultValue } from './types';
-import { PreferredTheme, Process } from '../../../main/types';
+import { PreferredTheme, Process } from '../../../common/types';
 
 function AppStateProvider({ children }: PropsWithChildren) {
-  const [processes, set$processes] = useState<Process[]>([]);
+  const [processes, set$processes] = useState<Record<string, Process[]>>({});
   const [selectedProcesses, set$selectedProcesses] = useState<string[]>([]);
   const [settings, set$settings] = useState<AppSettings>(
     defaultValue.appSettings,
