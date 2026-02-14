@@ -1,7 +1,7 @@
 import { Box, Stack, Typography } from '@mui/material';
 import { useMemo } from 'react';
 
-import { prepareILikeRegexp } from '../../../utils/ilike';
+import { prepareILikeRegexp } from '../../../utils/prepare-ilike-regexp';
 
 import ProcessGroup from './components/ProcessGroup/ProcessGroup';
 

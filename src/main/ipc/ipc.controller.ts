@@ -1,68 +1,93 @@
-import { BrowserWindow, ipcMain } from 'electron';
+import { app, ipcMain } from 'electron';
 
 import { settingsStore } from '../store';
+
 import { AppStateController } from '../temp/app-state.controller';
+import { MainWindowController } from '../main-window/main-window.controller';
+import { KeybindingsController } from '../temp/keybindings.controller';
 
 import { Channels } from './ipc.types';
+import { PreferredTheme } from '../../common/types';
 
 import { getTitleBarOverlayOptions } from '../util';
-
-import { PreferredTheme } from '../../common/types';
 
 export class IpcController {
   constructor(
     private appStateController: AppStateController,
-    private mainWindow?: BrowserWindow,
+    private mainWindowController: MainWindowController,
+    private keybindingsController: KeybindingsController,
   ) {}
 
-  async init() {
-    ipcMain.handle('get-settings', () => {
+  init() {
+    ipcMain.handle(Channels.GET_SETTINGS, () => {
       return settingsStore.get('settings');
     });
 
-    ipcMain.handle('get-selected-processes', () => {
+    ipcMain.handle(Channels.GET_SELECTED_PROCESSES, () => {
       return settingsStore.get('selectedProcesses');
     });
 
-    // ipcMain.on('set-mute-keybind', (e, newKey: string) => {
-    //   settingsStore.set('settings.muteKeyBind', newKey);
-    //   globalShortcut.unregisterAll();
-    //   registerKeyBinding();
-    // });
+    ipcMain.on(
+      Channels.SET_MUTE_SELECTED_PROCESSES_KEYBINDING,
+      (e, newKey: string) => {
+        settingsStore.set('settings.keybindings.muteSelectedProcesses', newKey);
 
-    // ipcMain.on(
-    //   'set-preferred-theme',
-    //   (e, newPreferredTheme: PreferredTheme) => {
-    //     settingsStore.set('settings.preferredTheme', newPreferredTheme);
+        this.keybindingsController.registerMuteSelectedProcesses();
+      },
+    );
 
-    //     const titleBarOverlayOptions =
-    //       getTitleBarOverlayOptions(newPreferredTheme);
+    ipcMain.on(
+      Channels.SET_MUTE_CURRENT_ACTIVE_PROCESS_KEYBINDING,
+      (e, newKey: string) => {
+        settingsStore.set(
+          'settings.keybindings.muteCurrentActiveProcess',
+          newKey,
+        );
 
-    //     this.mainWindow?.setTitleBarOverlay(titleBarOverlayOptions);
-    //   },
-    // );
+        this.keybindingsController.registerMuteCurrentActiveProcess();
+      },
+    );
 
-    ipcMain.on('set-selected-processes', (e, names: string[]) => {
+    ipcMain.on(
+      Channels.SET_PREFERRED_THEME,
+      (e, newPreferredTheme: PreferredTheme) => {
+        settingsStore.set('settings.preferredTheme', newPreferredTheme);
+
+        const titleBarOverlayOptions =
+          getTitleBarOverlayOptions(newPreferredTheme);
+
+        this.mainWindowController.mainWindow?.setTitleBarOverlay(
+          titleBarOverlayOptions,
+        );
+      },
+    );
+
+    ipcMain.on(Channels.SET_SELECTED_PROCESSES, (e, names: string[]) => {
       settingsStore.set('selectedProcesses', names);
     });
 
-    // ipcMain.on('set-startup-enabled', (e, enabled: boolean) => {
-    //   settingsStore.set('settings.onStartup', enabled);
-    //   setAutoLaunch(enabled);
-    // });
+    ipcMain.on(Channels.SET_STARTUP_ENABLED, (e, enabled: boolean) => {
+      settingsStore.set('settings.onStartup', enabled);
 
-    // ipcMain.on('disable-keybinds', () => {
-    //   globalShortcut.unregisterAll();
-    //   appStateController.set('keyBindsEnabled', false);
-    // });
+      app.setLoginItemSettings({
+        openAtLogin: enabled,
+        path: process.execPath,
+        args: enabled ? ['--hidden'] : [],
+      });
+    });
 
-    // ipcMain.on('enable-keybinds', () => {
-    //   const keyBindsEnabled = appStateController.get('keyBindsEnabled');
+    ipcMain.on(Channels.DISABLE_KEYBINDINGS, () => {
+      this.keybindingsController.unregisterAll();
+      this.appStateController.set('keyBindsEnabled', false);
+    });
 
-    //   if (!keyBindsEnabled) {
-    //     registerKeyBinding();
-    //     appStateController.set('keyBindsEnabled', true);
-    //   }
-    // });
+    ipcMain.on(Channels.ENABLE_KEYBINDINGS, () => {
+      const keyBindsEnabled = this.appStateController.get('keyBindsEnabled');
+
+      if (!keyBindsEnabled) {
+        this.keybindingsController.registerAll();
+        this.appStateController.set('keyBindsEnabled', true);
+      }
+    });
   }
 }

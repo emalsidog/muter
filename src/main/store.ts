@@ -5,9 +5,12 @@ import { PreferredTheme } from '../common/types';
 interface SettingsSchema {
   selectedProcesses: string[];
   settings: {
-    muteKeyBind: string;
     preferredTheme: PreferredTheme;
     onStartup: boolean;
+    keybindings: {
+      muteSelectedProcesses: string;
+      muteCurrentActiveProcess: string;
+    };
   };
 }
 
@@ -15,9 +18,12 @@ export const settingsStore = new Store<SettingsSchema>({
   defaults: {
     selectedProcesses: [],
     settings: {
-      muteKeyBind: 'Control+Alt+M',
       preferredTheme: 'system',
       onStartup: true,
+      keybindings: {
+        muteSelectedProcesses: 'Control+Alt+M',
+        muteCurrentActiveProcess: 'Control+Alt+N',
+      },
     },
   },
 });

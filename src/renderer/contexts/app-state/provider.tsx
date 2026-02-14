@@ -10,6 +10,8 @@ import { AppSettings, AppStateContext, defaultValue } from './types';
 import { PreferredTheme, Process } from '../../../common/types';
 import { Channels } from '../../../main/ipc/ipc.types';
 
+import { ipcRenderer } from '../../ipc-renderer';
+
 function AppStateProvider({ children }: PropsWithChildren) {
   const [processes, set$processes] = useState<Record<string, Process[]>>({});
   const [selectedProcesses, set$selectedProcesses] = useState<string[]>([]);
@@ -20,7 +22,7 @@ function AppStateProvider({ children }: PropsWithChildren) {
 
   const getSelectedProcesses = async () => {
     try {
-      const selectedProcessesList = await window.electron.ipcRenderer.invoke(
+      const selectedProcessesList = await ipcRenderer.invoke(
         Channels.GET_SELECTED_PROCESSES,
       );
 
@@ -32,9 +34,7 @@ function AppStateProvider({ children }: PropsWithChildren) {
 
   const getSettings = async () => {
     try {
-      const settingsObject = await window.electron.ipcRenderer.invoke(
-        Channels.GET_SETTINGS,
-      );
+      const settingsObject = await ipcRenderer.invoke(Channels.GET_SETTINGS);
 
       set$settings(settingsObject);
     } catch (error) {
@@ -57,7 +57,10 @@ function AppStateProvider({ children }: PropsWithChildren) {
         muteKeyBind: newKeyBind,
       });
 
-      // window.electron.ipcRenderer.send('set-mute-keybind', newKeyBind);
+      ipcRenderer.send(
+        Channels.SET_MUTE_SELECTED_PROCESSES_KEYBINDING,
+        newKeyBind,
+      );
     },
     [settings],
   );
@@ -69,10 +72,7 @@ function AppStateProvider({ children }: PropsWithChildren) {
         preferredTheme: newPreferredTheme,
       });
 
-      // window.electron.ipcRenderer.send(
-      //   'set-preferred-theme',
-      //   newPreferredTheme,
-      // );
+      ipcRenderer.send(Channels.SET_PREFERRED_THEME, newPreferredTheme);
     },
     [settings],
   );
@@ -95,10 +95,7 @@ function AppStateProvider({ children }: PropsWithChildren) {
 
       set$selectedProcesses(newSelectedProcesses);
 
-      window.electron.ipcRenderer.send(
-        Channels.SET_SELECTED_PROCESSES,
-        newSelectedProcesses,
-      );
+      ipcRenderer.send(Channels.SET_SELECTED_PROCESSES, newSelectedProcesses);
     },
     [selectedProcesses],
   );
@@ -110,7 +107,7 @@ function AppStateProvider({ children }: PropsWithChildren) {
         onStartup: newOnStartup,
       });
 
-      // window.electron.ipcRenderer.send('set-startup-enabled', newOnStartup);
+      ipcRenderer.send(Channels.SET_STARTUP_ENABLED, newOnStartup);
     },
     [settings],
   );
@@ -121,14 +118,12 @@ function AppStateProvider({ children }: PropsWithChildren) {
   }, []);
 
   useEffect(() => {
-    const unsubscribe = window.electron.ipcRenderer.on(
+    const unsubscribe = ipcRenderer.on(
       Channels.PROCESSES_UPDATE,
       (processesList) => {
-        console.log(processesList);
         set$processes(processesList);
       },
     );
-
 
     return () => {
       unsubscribe();

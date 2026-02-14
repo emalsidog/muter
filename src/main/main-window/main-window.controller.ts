@@ -1,4 +1,4 @@
-import { BrowserWindow, shell } from 'electron';
+import { app, BrowserWindow, shell } from 'electron';
 
 import { settingsStore } from '../store';
 import { AppStateController } from '../temp/app-state.controller';
@@ -17,11 +17,9 @@ export class MainWindowController {
   constructor(private appStateController: AppStateController) {}
 
   async create() {
-    console.log('test test test test')
-
-    if (isDebug()) {
-      await this.installExtensions();
-    }
+    // if (isDebug()) {
+    //   await this.installExtensions();
+    // }
 
     const titleBarOverlayOptions = getTitleBarOverlayOptions(
       settingsStore.get('settings.preferredTheme'),
@@ -41,8 +39,6 @@ export class MainWindowController {
       },
     });
 
-    console.log(1);
-
     this.mainWindow.loadURL(resolveHtmlPath('index.html'));
 
     this.mainWindow.webContents.setWindowOpenHandler((edata) => {
@@ -60,9 +56,14 @@ export class MainWindowController {
     }
 
     this.mainWindow.on('ready-to-show', () => {
-      // if (!startedHidden && !process.env.START_MINIMIZED) {
+      const loginItemSettings = app.getLoginItemSettings();
+
+      const startedHidden =
+        loginItemSettings.wasOpenedAtLogin || process.argv.includes('--hidden');
+
+      if (!startedHidden && !process.env.START_MINIMIZED) {
         this.mainWindow?.show();
-      // }
+      }
     });
 
     this.mainWindow.on('closed', () => {

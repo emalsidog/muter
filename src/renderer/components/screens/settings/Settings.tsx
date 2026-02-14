@@ -14,6 +14,9 @@ import useAppState from '../../../contexts/app-state/useAppState';
 import { useWindowSize } from '../../../hooks/useWindowSize';
 
 import { PreferredTheme } from '../../../../common/types';
+import { Channels } from '../../../../main/ipc/ipc.types';
+
+import { ipcRenderer } from '../../../ipc-renderer';
 
 const allowedFKeys = Array.from({ length: 12 }, (_, i) => `F${i + 1}`);
 const allowedLetters = /^[A-Z]$/;
@@ -76,15 +79,15 @@ function Settings() {
   };
 
   useEffect(() => {
-    // if (isRecordingKeyBind) {
-    //   window.electron.ipcRenderer.send('disable-keybinds');
-    // } else {
-    //   window.electron.ipcRenderer.send('enable-keybinds');
-    // }
+    if (isRecordingKeyBind) {
+      ipcRenderer.send(Channels.DISABLE_KEYBINDINGS);
+    } else {
+      ipcRenderer.send(Channels.ENABLE_KEYBINDINGS);
+    }
 
-    // return () => {
-    //   window.electron.ipcRenderer.send('enable-keybinds');
-    // };
+    return () => {
+      ipcRenderer.send(Channels.ENABLE_KEYBINDINGS);
+    };
   }, [isRecordingKeyBind]);
 
   return (

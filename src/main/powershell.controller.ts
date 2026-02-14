@@ -1,6 +1,6 @@
 import { spawn, ChildProcessWithoutNullStreams } from 'child_process';
 
-export class PowerShellManager {
+export class PowerShellController {
   private process: ChildProcessWithoutNullStreams;
   private buffer: string;
   private pending: Array<(output: string) => void>;

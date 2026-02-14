@@ -12,10 +12,6 @@ export class TrayController {
   ) {}
 
   build(): Tray {
-    // const icon = app.isPackaged
-    //   ? path.join(process.resourcesPath, 'assets', 'icon.png')
-    //   : path.join(app.getAppPath(), 'assets', 'icon.png');
-
     const tray = new Tray(getAssetPath('icon.png'));
     const menu = Menu.buildFromTemplate(this.buildMenuTemplate());
 
