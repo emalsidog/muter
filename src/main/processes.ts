@@ -1,10 +1,8 @@
-import { PowerShell } from './powershell';
+import { PowerShellManager } from './powershell.manager';
 import { Process } from '../common/types';
 
 export default class ProcessManager {
-  private powershell: PowerShell;
-
-  constructor(powershell: PowerShell) {
+  constructor(private powershell: PowerShellManager) {
     this.powershell = powershell;
   }
 

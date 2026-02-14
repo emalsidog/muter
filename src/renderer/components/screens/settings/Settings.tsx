@@ -76,15 +76,15 @@ function Settings() {
   };
 
   useEffect(() => {
-    if (isRecordingKeyBind) {
-      window.electron.ipcRenderer.send('disable-keybinds');
-    } else {
-      window.electron.ipcRenderer.send('enable-keybinds');
-    }
+    // if (isRecordingKeyBind) {
+    //   window.electron.ipcRenderer.send('disable-keybinds');
+    // } else {
+    //   window.electron.ipcRenderer.send('enable-keybinds');
+    // }
 
-    return () => {
-      window.electron.ipcRenderer.send('enable-keybinds');
-    };
+    // return () => {
+    //   window.electron.ipcRenderer.send('enable-keybinds');
+    // };
   }, [isRecordingKeyBind]);
 
   return (

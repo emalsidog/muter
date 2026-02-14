@@ -1,6 +1,6 @@
 import Store from 'electron-store';
 
-import { PreferredTheme } from './types';
+import { PreferredTheme } from '../common/types';
 
 interface SettingsSchema {
   selectedProcesses: string[];
