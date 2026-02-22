@@ -2,13 +2,10 @@
 /* eslint no-unused-vars: off */
 import { contextBridge, ipcRenderer, IpcRendererEvent } from 'electron';
 
-export type Channels = 'processes-update';
+import { Channels } from './ipc/ipc.types';
 
 const electronHandler = {
   ipcRenderer: {
-    sendMessage(channel: Channels, ...args: any[]) {
-      ipcRenderer.send(channel, ...args);
-    },
     on(channel: Channels, func: (...args: any[]) => void) {
       const subscription = (_event: IpcRendererEvent, ...args: any[]) =>
         func(...args);
@@ -22,10 +19,12 @@ const electronHandler = {
     once(channel: Channels, func: (...args: any[]) => void) {
       ipcRenderer.once(channel, (_event, ...args) => func(...args));
     },
-    invoke: (channel: string, data?: any) => ipcRenderer.invoke(channel, data),
-    send: (channel: string, data?: any) => ipcRenderer.send(channel, data),
+    invoke: (channel: Channels, data?: any) => ipcRenderer.invoke(channel, data),
+    send: (channel: Channels, data?: any) => ipcRenderer.send(channel, data),
   },
 };
+
+console.log('Preload script is executing...');
 
 contextBridge.exposeInMainWorld('electron', electronHandler);
 

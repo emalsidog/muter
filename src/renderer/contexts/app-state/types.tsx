@@ -1,22 +1,29 @@
 import { createContext } from 'react';
-import { PreferredTheme, Process } from '../../../common/types';
+import type { PreferredTheme, Process, StatsItem } from 'common/types';
 
 export interface AppSettings {
-  muteKeyBind: string;
   preferredTheme: PreferredTheme;
   onStartup: boolean;
+  keybindings: {
+    muteSelectedProcesses: string;
+    muteCurrentActiveProcess: string;
+  };
 }
 
 interface AppState {
   processes: Record<string, Process[]>;
   selectedProcesses: string[];
   processesSearch: string;
+  stats: Record<string, StatsItem>;
 }
 
 export interface IAppStateContext {
   appSettings: AppSettings;
   appState: AppState;
-  updateKeyBind: (keyBind: string) => void;
+  updateKeybinding: (
+    name: 'muteSelectedProcesses' | 'muteCurrentActiveProcess',
+    value: string,
+  ) => void;
   updatePreferredTheme: (newPreferredTheme: PreferredTheme) => void;
   updateProcessesSearch: (newProcessesSearch: string) => void;
   updateSelectedProcesses: (selectedProcess: string) => void;
@@ -25,16 +32,20 @@ export interface IAppStateContext {
 
 export const defaultValue: IAppStateContext = {
   appSettings: {
-    muteKeyBind: '',
     preferredTheme: 'system',
     onStartup: true,
+    keybindings: {
+      muteCurrentActiveProcess: 'F10',
+      muteSelectedProcesses: 'F11',
+    },
   },
   appState: {
+    stats: {},
     processes: {},
     selectedProcesses: [],
     processesSearch: '',
   },
-  updateKeyBind: () => {},
+  updateKeybinding: () => {},
   updatePreferredTheme: () => {},
   updateProcessesSearch: () => {},
   updateSelectedProcesses: () => {},

@@ -1,6 +1,6 @@
 import { ListItem, ListItemText } from '@mui/material';
 
-import ProcessIcon from '../../../../ProcessIcon/ProcessIcon';
+import ProcessIcon from 'renderer/components/ProcessIcon/ProcessIcon';
 
 import { Props } from './ProcessItem.types';
 

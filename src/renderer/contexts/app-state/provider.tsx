@@ -6,12 +6,16 @@ import {
   useState,
 } from 'react';
 
+import { Channels } from 'main/ipc/ipc.types';
+import { ipcRenderer } from 'renderer/ipc-renderer';
+
+import type { PreferredTheme, Process, StatsItem } from 'common/types';
 import { AppSettings, AppStateContext, defaultValue } from './types';
-import { PreferredTheme, Process } from '../../../common/types';
 
 function AppStateProvider({ children }: PropsWithChildren) {
   const [processes, set$processes] = useState<Record<string, Process[]>>({});
   const [selectedProcesses, set$selectedProcesses] = useState<string[]>([]);
+  const [stats, set$stats] = useState<Record<string, StatsItem>>({});
   const [settings, set$settings] = useState<AppSettings>(
     defaultValue.appSettings,
   );
@@ -19,8 +23,8 @@ function AppStateProvider({ children }: PropsWithChildren) {
 
   const getSelectedProcesses = async () => {
     try {
-      const selectedProcessesList = await window.electron.ipcRenderer.invoke(
-        'get-selected-processes',
+      const selectedProcessesList = await ipcRenderer.invoke(
+        Channels.GET_SELECTED_PROCESSES,
       );
 
       set$selectedProcesses(selectedProcessesList);
@@ -31,8 +35,7 @@ function AppStateProvider({ children }: PropsWithChildren) {
 
   const getSettings = async () => {
     try {
-      const settingsObject =
-        await window.electron.ipcRenderer.invoke('get-settings');
+      const settingsObject = await ipcRenderer.invoke(Channels.GET_SETTINGS);
 
       set$settings(settingsObject);
     } catch (error) {
@@ -40,9 +43,21 @@ function AppStateProvider({ children }: PropsWithChildren) {
     }
   };
 
-  const updateKeyBind = useCallback(
-    (newKeyBind: string) => {
-      const keys = newKeyBind.split('+');
+  const getStats = async () => {
+    try {
+      const statsList = await ipcRenderer.invoke(Channels.GET_STATS);
+      set$stats(statsList);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const updateKeybinding = useCallback(
+    (
+      name: 'muteSelectedProcesses' | 'muteCurrentActiveProcess',
+      value: string,
+    ) => {
+      const keys = value.split('+');
       const modifiers = ['Ctrl', 'Shift', 'Alt', 'Meta'];
       const allAreModifiers = keys.every((key) => modifiers.includes(key));
 
@@ -52,10 +67,25 @@ function AppStateProvider({ children }: PropsWithChildren) {
 
       set$settings({
         ...settings,
-        muteKeyBind: newKeyBind,
+        keybindings: {
+          ...settings.keybindings,
+          [name]: value,
+        },
       });
 
-      window.electron.ipcRenderer.send('set-mute-keybind', newKeyBind);
+      if (name === 'muteSelectedProcesses') {
+        ipcRenderer.send(
+          Channels.SET_MUTE_SELECTED_PROCESSES_KEYBINDING,
+          value,
+        );
+      }
+
+      if (name === 'muteCurrentActiveProcess') {
+        ipcRenderer.send(
+          Channels.SET_MUTE_CURRENT_ACTIVE_PROCESS_KEYBINDING,
+          value,
+        );
+      }
     },
     [settings],
   );
@@ -67,10 +97,7 @@ function AppStateProvider({ children }: PropsWithChildren) {
         preferredTheme: newPreferredTheme,
       });
 
-      window.electron.ipcRenderer.send(
-        'set-preferred-theme',
-        newPreferredTheme,
-      );
+      ipcRenderer.send(Channels.SET_PREFERRED_THEME, newPreferredTheme);
     },
     [settings],
   );
@@ -93,10 +120,7 @@ function AppStateProvider({ children }: PropsWithChildren) {
 
       set$selectedProcesses(newSelectedProcesses);
 
-      window.electron.ipcRenderer.send(
-        'set-selected-processes',
-        newSelectedProcesses,
-      );
+      ipcRenderer.send(Channels.SET_SELECTED_PROCESSES, newSelectedProcesses);
     },
     [selectedProcesses],
   );
@@ -108,7 +132,7 @@ function AppStateProvider({ children }: PropsWithChildren) {
         onStartup: newOnStartup,
       });
 
-      window.electron.ipcRenderer.send('set-startup-enabled', newOnStartup);
+      ipcRenderer.send(Channels.SET_STARTUP_ENABLED, newOnStartup);
     },
     [settings],
   );
@@ -116,18 +140,40 @@ function AppStateProvider({ children }: PropsWithChildren) {
   useEffect(() => {
     getSelectedProcesses();
     getSettings();
+    getStats();
   }, []);
 
   useEffect(() => {
-    const unsubscribe = window.electron.ipcRenderer.on(
-      'processes-update',
-      (processesList) => {
-        set$processes(processesList);
+    const processesUpdateUnsubscribe = ipcRenderer.on(
+      Channels.PROCESSES_UPDATE,
+      (processesMap) => {
+        set$processes(processesMap);
+      },
+    );
+
+    const statsUpdateUnsubscribe = ipcRenderer.on(
+      Channels.STATS_UPDATE,
+      (data) => {
+        const { type, payload } = data;
+
+        if (type === 'PARTIAL_UPDATE') {
+          set$stats((prev) => ({
+            ...prev,
+            [payload.processName]: payload.updatedStat,
+          }));
+
+          return;
+        }
+
+        if (type === 'FULL_UPDATE') {
+          set$stats(payload.stats);
+        }
       },
     );
 
     return () => {
-      unsubscribe();
+      processesUpdateUnsubscribe();
+      statsUpdateUnsubscribe();
     };
   }, []);
 
@@ -138,19 +184,21 @@ function AppStateProvider({ children }: PropsWithChildren) {
         processes,
         selectedProcesses,
         processesSearch,
+        stats,
       },
-      updateKeyBind,
+      updateKeybinding,
       updatePreferredTheme,
       updateProcessesSearch,
       updateSelectedProcesses,
       updateOnStartup,
     }),
     [
+      stats,
       settings,
       processes,
       selectedProcesses,
       processesSearch,
-      updateKeyBind,
+      updateKeybinding,
       updatePreferredTheme,
       updateProcessesSearch,
       updateSelectedProcesses,

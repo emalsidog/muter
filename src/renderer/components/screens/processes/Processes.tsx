@@ -1,18 +1,17 @@
-import { Box, Stack, Typography } from '@mui/material';
+import { Stack, Typography } from '@mui/material';
 import { useMemo } from 'react';
 
-import { prepareILikeRegexp } from '../../../utils/ilike';
+import { prepareILikeRegexp } from 'renderer/utils/prepare-ilike-regexp';
 
+import useAppState from 'renderer/contexts/app-state/useAppState';
+
+import { Process } from 'common/types';
+
+import Container from 'renderer/components/Container/Container';
 import ProcessGroup from './components/ProcessGroup/ProcessGroup';
-
-import useAppState from '../../../contexts/app-state/useAppState';
-import { useWindowSize } from '../../../hooks/useWindowSize';
-
-import { Process } from '../../../../common/types';
 
 function Processes() {
   const { appState } = useAppState();
-  const { height } = useWindowSize();
 
   const processesList = useMemo(() => {
     const iLikeRegexp = prepareILikeRegexp(`%${appState.processesSearch}%`);
@@ -39,25 +38,7 @@ function Processes() {
         Processes
       </Typography>
 
-      <Box
-        maxHeight={height - 172}
-        sx={(theme) => ({
-          overflowY: 'auto',
-          '&::-webkit-scrollbar': {
-            width: 8,
-          },
-
-          '&::-webkit-scrollbar-track': {
-            backgroundColor: 'transparent',
-            borderRadius: 4,
-          },
-
-          '&::-webkit-scrollbar-thumb': {
-            background: theme.palette.divider,
-            borderRadius: 4,
-          },
-        })}
-      >
+      <Container>
         {Object.entries(processesList).map(([processName, processes]) => (
           <ProcessGroup
             key={processName}
@@ -65,7 +46,7 @@ function Processes() {
             processes={processes}
           />
         ))}
-      </Box>
+      </Container>
     </Stack>
   );
 }

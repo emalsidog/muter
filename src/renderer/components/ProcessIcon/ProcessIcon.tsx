@@ -1,6 +1,5 @@
 import { Props } from './ProcessIcon.types';
 
-// TODO: add fallback image
 function ProcessIcon({ path, alt }: Props) {
   return (
     <img
