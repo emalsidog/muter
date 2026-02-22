@@ -1,7 +1,9 @@
 import { app, BrowserWindow, shell } from 'electron';
 
 import { settingsStore } from '../store';
-import { AppStateController } from '../temp/app-state.controller';
+
+import { AppStateController } from '../app-state/app-state.controller';
+import { KeybindingsController } from '../keybindings/keybindings.controller';
 
 import {
   isDebug,
@@ -14,7 +16,10 @@ import {
 export class MainWindowController {
   mainWindow: BrowserWindow | null = null;
 
-  constructor(private appStateController: AppStateController) {}
+  constructor(
+    private appStateController: AppStateController,
+    private keybindingController: KeybindingsController,
+  ) {}
 
   async create() {
     // if (isDebug()) {
@@ -56,14 +61,7 @@ export class MainWindowController {
     }
 
     this.mainWindow.on('ready-to-show', () => {
-      const loginItemSettings = app.getLoginItemSettings();
-
-      const startedHidden =
-        loginItemSettings.wasOpenedAtLogin || process.argv.includes('--hidden');
-
-      if (!startedHidden && !process.env.START_MINIMIZED) {
-        this.mainWindow?.show();
-      }
+      this.mainWindow?.show();
     });
 
     this.mainWindow.on('closed', () => {
@@ -76,27 +74,15 @@ export class MainWindowController {
       if (!isQuitting) {
         e.preventDefault();
         this.mainWindow?.hide();
-      } else {
-        this.mainWindow = null;
       }
     });
 
     this.mainWindow.on('minimize', () => {
-      const keyBindsEnabled = this.appStateController.get('keyBindsEnabled');
-
-      // if (!keyBindsEnabled) {
-      //   registerKeyBinding();
-      //   appStateController.set('keyBindsEnabled', true);
-      // }
+      this.keybindingController.registerAll();
     });
 
     this.mainWindow.on('hide', () => {
-      const keyBindsEnabled = this.appStateController.get('keyBindsEnabled');
-
-      // if (!keyBindsEnabled) {
-      //   registerKeyBinding();
-      //   appStateController.set('keyBindsEnabled', true);
-      // }
+      this.keybindingController.registerAll();
     });
   }
 

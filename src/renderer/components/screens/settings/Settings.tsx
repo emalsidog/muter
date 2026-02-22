@@ -1,73 +1,34 @@
 import {
-  Button,
   MenuItem,
   Select,
   SelectChangeEvent,
   Stack,
   Switch,
-  TextField,
   Typography,
 } from '@mui/material';
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 
-import useAppState from '../../../contexts/app-state/useAppState';
-import { useWindowSize } from '../../../hooks/useWindowSize';
+import useAppState from 'renderer/contexts/app-state/useAppState';
+import { useWindowSize } from 'renderer/hooks/useWindowSize';
 
-import { PreferredTheme } from '../../../../common/types';
-import { Channels } from '../../../../main/ipc/ipc.types';
+import { PreferredTheme } from 'common/types';
 
-import { ipcRenderer } from '../../../ipc-renderer';
-
-const allowedFKeys = Array.from({ length: 12 }, (_, i) => `F${i + 1}`);
-const allowedLetters = /^[A-Z]$/;
-const allowedNumbers = /^[0-9]$/;
+import RecordKeybinding from './components/RecordKeybinding/RecordKeybinding';
 
 function Settings() {
-  const { appSettings, updateKeyBind, updatePreferredTheme, updateOnStartup } =
-    useAppState();
+  const {
+    appSettings,
+    updateKeybinding,
+    updatePreferredTheme,
+    updateOnStartup,
+  } = useAppState();
   const { width } = useWindowSize();
 
-  const [isRecordingKeyBind, set$isRecordingKeyBind] = useState(false);
-  const [keyBind, set$keyBind] = useState('');
-
-  const handleRecordKeyBind = () => {
-    set$isRecordingKeyBind(!isRecordingKeyBind);
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    e.preventDefault();
-
-    if (!isRecordingKeyBind) return;
-
-    const modifiers = [
-      e.ctrlKey ? 'Ctrl' : null,
-      e.shiftKey ? 'Shift' : null,
-      e.altKey ? 'Alt' : null,
-      e.metaKey ? 'Meta' : null,
-    ].filter(Boolean);
-
-    let mainKey: string | null = null;
-
-    if (['Control', 'Shift', 'Alt', 'Meta'].includes(e.key)) {
-      mainKey = null; // modifier only, ignore as main
-    } else if (allowedFKeys.includes(e.key)) {
-      mainKey = e.key;
-    } else if (allowedLetters.test(e.key.toUpperCase())) {
-      mainKey = e.key.toUpperCase();
-    } else if (allowedNumbers.test(e.key)) {
-      mainKey = e.key;
-    } else {
-      return;
-    }
-
-    const combo = [...modifiers, mainKey].filter(Boolean).join('+');
-    set$keyBind(combo);
-  };
-
-  const handleKeyUp = () => {
-    set$isRecordingKeyBind(false);
-    updateKeyBind(keyBind);
-  };
+  const handleFinishRecording =
+    (keybindingName: 'muteSelectedProcesses' | 'muteCurrentActiveProcess') =>
+    (keybindingValue: string) => {
+      updateKeybinding(keybindingName, keybindingValue);
+    };
 
   const handlePreferredThemeChange = (e: SelectChangeEvent) => {
     const theme = e.target.value as PreferredTheme;
@@ -77,18 +38,6 @@ function Settings() {
   const handleOnStartupChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     updateOnStartup(e.target.checked);
   };
-
-  useEffect(() => {
-    if (isRecordingKeyBind) {
-      ipcRenderer.send(Channels.DISABLE_KEYBINDINGS);
-    } else {
-      ipcRenderer.send(Channels.ENABLE_KEYBINDINGS);
-    }
-
-    return () => {
-      ipcRenderer.send(Channels.ENABLE_KEYBINDINGS);
-    };
-  }, [isRecordingKeyBind]);
 
   return (
     <Stack flex={1} direction="column" gap="12px" sx={{ userSelect: 'none' }}>
@@ -102,48 +51,42 @@ function Settings() {
         gap="24px"
       >
         <Stack gap="8px" width="100%" flex={1}>
-          <Typography>Toggle mute</Typography>
+          <Typography>Mute/Unmute selected processes</Typography>
 
-          <TextField
-            error={isRecordingKeyBind}
-            onKeyDown={handleKeyDown}
-            onKeyUp={handleKeyUp}
-            size="small"
-            value={appSettings.muteKeyBind}
-            slotProps={{
-              input: {
-                readOnly: true,
-                endAdornment: (
-                  <Button
-                    color={isRecordingKeyBind ? 'error' : 'primary'}
-                    variant={isRecordingKeyBind ? 'outlined' : 'contained'}
-                    size="small"
-                    onClick={handleRecordKeyBind}
-                    sx={{ minWidth: 150 }}
-                  >
-                    <Typography textTransform="initial" variant="body1">
-                      {isRecordingKeyBind ? 'Stop Recording' : 'Edit Keybind'}
-                    </Typography>
-                  </Button>
-                ),
-              },
-            }}
+          <RecordKeybinding
+            value={appSettings.keybindings.muteSelectedProcesses}
+            onFinish={handleFinishRecording('muteSelectedProcesses')}
           />
         </Stack>
 
         <Stack gap="8px" width="100%" flex={1}>
-          <Typography>Theme</Typography>
+          <Typography>Mute/Unmute focused window</Typography>
 
-          <Select
-            value={appSettings.preferredTheme}
-            onChange={handlePreferredThemeChange}
-            size="small"
-          >
-            <MenuItem value="system">System</MenuItem>
-            <MenuItem value="light">Light</MenuItem>
-            <MenuItem value="dark">Dark</MenuItem>
-          </Select>
+          <RecordKeybinding
+            value={appSettings.keybindings.muteCurrentActiveProcess}
+            onFinish={handleFinishRecording('muteCurrentActiveProcess')}
+          />
         </Stack>
+      </Stack>
+
+      <Stack gap="8px" width="100%" flex={1}>
+        <Typography>Theme</Typography>
+
+        <Select
+          value={appSettings.preferredTheme}
+          onChange={handlePreferredThemeChange}
+          size="small"
+          sx={{
+            width: '100%',
+            '& .MuiOutlinedInput-notchedOutline': {
+              transition: 'border-color 0.15s ease-in-out',
+            },
+          }}
+        >
+          <MenuItem value="system">System</MenuItem>
+          <MenuItem value="light">Light</MenuItem>
+          <MenuItem value="dark">Dark</MenuItem>
+        </Select>
       </Stack>
 
       <Stack

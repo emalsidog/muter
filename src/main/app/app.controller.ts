@@ -1,26 +1,33 @@
 import { app } from 'electron';
 
-import { AppStateController } from '../temp/app-state.controller';
-import { MainWindowController } from '../main-window/main-window.controller';
-import { TrayController } from '../temp/tray.controller';
 import { IpcController } from '../ipc/ipc.controller';
-import { ProcessesController } from '../processes/processes.controller';
-import { KeybindingsController } from '../temp/keybindings.controller';
-import { ProtocolController } from '../protocol.controller';
-import { PowerShellController } from '../powershell.controller';
-import { NativeThemeController } from '../temp/native-theme.controller';
+import { MainWindowController } from '../main-window/main-window.controller';
+import { MuterApiController } from '../muter-api/muter-api.controller';
+import { ProtocolController } from '../protocol/protocol.controller';
+import { AppStateController } from '../app-state/app-state.controller';
+import { KeybindingsController } from '../keybindings/keybindings.controller';
+import { NativeThemeController } from '../theme/native-theme.controller';
+import { TrayController } from '../tray/tray.controller';
+import { ProcessesController } from '../interval/processes.controller';
+import { StatsController } from '../stats/stats.controller';
 
 import { settingsStore } from '../store';
 
-import { MuteHelper } from '../mute-helper';
-
 export class AppController {
   private appStateController = new AppStateController();
-  private powerShellController = new PowerShellController();
-  private muteHelper = new MuteHelper();
+  private muterApiController = new MuterApiController();
   private protocolController = new ProtocolController();
+  private keybindingsController = new KeybindingsController(
+    this.appStateController,
+    this.muterApiController,
+    (): StatsController => this.statsController,
+  );
   private mainWindowController = new MainWindowController(
     this.appStateController,
+    this.keybindingsController,
+  );
+  private statsController = new StatsController(
+    (): MainWindowController => this.mainWindowController,
   );
   private nativeThemeController = new NativeThemeController(
     this.mainWindowController,
@@ -29,23 +36,18 @@ export class AppController {
     this.appStateController,
     this.mainWindowController,
   );
-  private keybindingsController = new KeybindingsController(
-    this.muteHelper,
+  private processesController = new ProcessesController(
+    this.muterApiController,
     this.appStateController,
+    this.mainWindowController,
   );
   private ipcController = new IpcController(
     this.appStateController,
     this.mainWindowController,
     this.keybindingsController,
   );
-  private processesController = new ProcessesController(
-    this.powerShellController,
-    this.appStateController,
-    this.mainWindowController,
-  );
 
   async init() {
-    app.on('window-all-closed', () => this.onWindowAllClosed());
     app.on('before-quit', () => this.onBeforeQuit());
     app.on('second-instance', () => this.onSecondInstance());
     app.on('activate', () => this.onActivate());
@@ -53,24 +55,23 @@ export class AppController {
     try {
       await app.whenReady();
 
+      await this.processesController.start();
+
       this.protocolController.init();
-      await this.processesController.init();
       this.keybindingsController.registerAll();
       this.ipcController.init();
       this.trayController.build();
       this.nativeThemeController.init();
 
-      this.renderMainWindow();
+      this.handleInitialVisibility();
     } catch (error) {
       console.error(`Error initializing app`, error);
     }
   }
 
-  private renderMainWindow() {
-    const loginItemSettings = app.getLoginItemSettings();
+  private handleInitialVisibility() {
+    const loginSettings = app.getLoginItemSettings();
     const settings = settingsStore.get('settings');
-    const shouldStartHidden =
-      loginItemSettings.wasOpenedAtLogin || process.argv.includes('--hidden');
 
     app.setLoginItemSettings({
       openAtLogin: settings.onStartup ?? false,
@@ -78,14 +79,11 @@ export class AppController {
       args: ['--hidden'],
     });
 
-    if (!shouldStartHidden) {
-      this.mainWindowController.create();
-    }
-  }
+    const wasOpenedBySystem =
+      loginSettings.wasOpenedAtLogin || process.argv.includes('--hidden');
 
-  private onWindowAllClosed() {
-    if (process.platform !== 'darwin') {
-      app.quit();
+    if (!wasOpenedBySystem) {
+      this.mainWindowController.create();
     }
   }
 
@@ -94,14 +92,13 @@ export class AppController {
   }
 
   private onSecondInstance() {
-    const mainWindow = this.mainWindowController.mainWindow;
-
-    if (mainWindow) {
-      if (mainWindow.isMinimized()) {
-        mainWindow.restore();
+    if (this.mainWindowController.mainWindow) {
+      if (this.mainWindowController.mainWindow.isMinimized()) {
+        this.mainWindowController.mainWindow.restore();
       }
 
-      mainWindow.show();
+      this.mainWindowController.mainWindow.show();
+      this.mainWindowController.mainWindow.focus();
     } else {
       this.mainWindowController.create();
     }

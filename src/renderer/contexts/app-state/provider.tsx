@@ -6,15 +6,16 @@ import {
   useState,
 } from 'react';
 
-import { AppSettings, AppStateContext, defaultValue } from './types';
-import { PreferredTheme, Process } from '../../../common/types';
-import { Channels } from '../../../main/ipc/ipc.types';
+import { Channels } from 'main/ipc/ipc.types';
+import { ipcRenderer } from 'renderer/ipc-renderer';
 
-import { ipcRenderer } from '../../ipc-renderer';
+import type { PreferredTheme, Process, StatsItem } from 'common/types';
+import { AppSettings, AppStateContext, defaultValue } from './types';
 
 function AppStateProvider({ children }: PropsWithChildren) {
   const [processes, set$processes] = useState<Record<string, Process[]>>({});
   const [selectedProcesses, set$selectedProcesses] = useState<string[]>([]);
+  const [stats, set$stats] = useState<Record<string, StatsItem>>({});
   const [settings, set$settings] = useState<AppSettings>(
     defaultValue.appSettings,
   );
@@ -42,9 +43,21 @@ function AppStateProvider({ children }: PropsWithChildren) {
     }
   };
 
-  const updateKeyBind = useCallback(
-    (newKeyBind: string) => {
-      const keys = newKeyBind.split('+');
+  const getStats = async () => {
+    try {
+      const statsList = await ipcRenderer.invoke(Channels.GET_STATS);
+      set$stats(statsList);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const updateKeybinding = useCallback(
+    (
+      name: 'muteSelectedProcesses' | 'muteCurrentActiveProcess',
+      value: string,
+    ) => {
+      const keys = value.split('+');
       const modifiers = ['Ctrl', 'Shift', 'Alt', 'Meta'];
       const allAreModifiers = keys.every((key) => modifiers.includes(key));
 
@@ -54,13 +67,25 @@ function AppStateProvider({ children }: PropsWithChildren) {
 
       set$settings({
         ...settings,
-        muteKeyBind: newKeyBind,
+        keybindings: {
+          ...settings.keybindings,
+          [name]: value,
+        },
       });
 
-      ipcRenderer.send(
-        Channels.SET_MUTE_SELECTED_PROCESSES_KEYBINDING,
-        newKeyBind,
-      );
+      if (name === 'muteSelectedProcesses') {
+        ipcRenderer.send(
+          Channels.SET_MUTE_SELECTED_PROCESSES_KEYBINDING,
+          value,
+        );
+      }
+
+      if (name === 'muteCurrentActiveProcess') {
+        ipcRenderer.send(
+          Channels.SET_MUTE_CURRENT_ACTIVE_PROCESS_KEYBINDING,
+          value,
+        );
+      }
     },
     [settings],
   );
@@ -115,18 +140,40 @@ function AppStateProvider({ children }: PropsWithChildren) {
   useEffect(() => {
     getSelectedProcesses();
     getSettings();
+    getStats();
   }, []);
 
   useEffect(() => {
-    const unsubscribe = ipcRenderer.on(
+    const processesUpdateUnsubscribe = ipcRenderer.on(
       Channels.PROCESSES_UPDATE,
-      (processesList) => {
-        set$processes(processesList);
+      (processesMap) => {
+        set$processes(processesMap);
+      },
+    );
+
+    const statsUpdateUnsubscribe = ipcRenderer.on(
+      Channels.STATS_UPDATE,
+      (data) => {
+        const { type, payload } = data;
+
+        if (type === 'PARTIAL_UPDATE') {
+          set$stats((prev) => ({
+            ...prev,
+            [payload.processName]: payload.updatedStat,
+          }));
+
+          return;
+        }
+
+        if (type === 'FULL_UPDATE') {
+          set$stats(payload.stats);
+        }
       },
     );
 
     return () => {
-      unsubscribe();
+      processesUpdateUnsubscribe();
+      statsUpdateUnsubscribe();
     };
   }, []);
 
@@ -137,19 +184,21 @@ function AppStateProvider({ children }: PropsWithChildren) {
         processes,
         selectedProcesses,
         processesSearch,
+        stats,
       },
-      updateKeyBind,
+      updateKeybinding,
       updatePreferredTheme,
       updateProcessesSearch,
       updateSelectedProcesses,
       updateOnStartup,
     }),
     [
+      stats,
       settings,
       processes,
       selectedProcesses,
       processesSearch,
-      updateKeyBind,
+      updateKeybinding,
       updatePreferredTheme,
       updateProcessesSearch,
       updateSelectedProcesses,

@@ -2,9 +2,9 @@ import { app, ipcMain } from 'electron';
 
 import { settingsStore } from '../store';
 
-import { AppStateController } from '../temp/app-state.controller';
+import { AppStateController } from '../app-state/app-state.controller';
 import { MainWindowController } from '../main-window/main-window.controller';
-import { KeybindingsController } from '../temp/keybindings.controller';
+import { KeybindingsController } from '../keybindings/keybindings.controller';
 
 import { Channels } from './ipc.types';
 import { PreferredTheme } from '../../common/types';
@@ -27,9 +27,15 @@ export class IpcController {
       return settingsStore.get('selectedProcesses');
     });
 
+    ipcMain.handle(Channels.GET_STATS, () => {
+      return settingsStore.get('stats');
+    });
+
     ipcMain.on(
       Channels.SET_MUTE_SELECTED_PROCESSES_KEYBINDING,
       (e, newKey: string) => {
+        this.keybindingsController.unregisterMuteSelectedProcesses();
+
         settingsStore.set('settings.keybindings.muteSelectedProcesses', newKey);
 
         this.keybindingsController.registerMuteSelectedProcesses();
@@ -39,6 +45,8 @@ export class IpcController {
     ipcMain.on(
       Channels.SET_MUTE_CURRENT_ACTIVE_PROCESS_KEYBINDING,
       (e, newKey: string) => {
+        this.keybindingsController.unregisterMuteCurrentActiveProcess();
+
         settingsStore.set(
           'settings.keybindings.muteCurrentActiveProcess',
           newKey,
@@ -72,7 +80,7 @@ export class IpcController {
       app.setLoginItemSettings({
         openAtLogin: enabled,
         path: process.execPath,
-        args: enabled ? ['--hidden'] : [],
+        args: ['--hidden'],
       });
     });
 
@@ -87,6 +95,21 @@ export class IpcController {
       if (!keyBindsEnabled) {
         this.keybindingsController.registerAll();
         this.appStateController.set('keyBindsEnabled', true);
+      }
+    });
+
+    ipcMain.on(Channels.RESET_STATS, () => {
+      settingsStore.set('stats', {});
+
+      const { mainWindow } = this.mainWindowController;
+
+      if (mainWindow) {
+        mainWindow.webContents.send(Channels.STATS_UPDATE, {
+          type: 'FULL_UPDATE',
+          payload: {
+            stats: settingsStore.get('stats'),
+          },
+        });
       }
     });
   }

@@ -3,6 +3,8 @@ import { createTheme, ThemeProvider } from '@mui/material/styles';
 
 import Processes from './components/screens/processes/Processes';
 import Settings from './components/screens/settings/Settings';
+import Stats from './components/screens/stats/Stats';
+
 import Layout from './components/Layout/Layout';
 
 import AppStateProvider from './contexts/app-state/provider';
@@ -25,6 +27,7 @@ export default function App() {
             <Route path="/" element={<Layout />}>
               <Route index element={<Processes />} />
               <Route path="settings" element={<Settings />} />
+              <Route path="stats" element={<Stats />} />
             </Route>
           </Routes>
         </Router>

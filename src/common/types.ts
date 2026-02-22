@@ -7,3 +7,10 @@ export interface Process {
 }
 
 export type PreferredTheme = 'system' | 'light' | 'dark';
+
+export interface StatsItem {
+  path: string;
+  name: string;
+  totalToggles: number;
+  lastToggle: string;
+}

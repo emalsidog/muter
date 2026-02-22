@@ -11,10 +11,10 @@ import {
 import React from 'react';
 import { motion } from 'framer-motion';
 
-import ProcessIcon from '../../../../ProcessIcon/ProcessIcon';
-import ProcessItem from '../ProcessItem/ProcessItem';
+import useAppState from 'renderer/contexts/app-state/useAppState';
 
-import useAppState from '../../../../../contexts/app-state/useAppState';
+import ProcessIcon from 'renderer/components/ProcessIcon/ProcessIcon';
+import ProcessItem from '../ProcessItem/ProcessItem';
 
 import { Props } from './ProcessGroup.types';
 

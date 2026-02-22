@@ -1,6 +1,6 @@
 import Store from 'electron-store';
 
-import { PreferredTheme } from '../common/types';
+import type { PreferredTheme, StatsItem } from 'common/types';
 
 interface SettingsSchema {
   selectedProcesses: string[];
@@ -12,17 +12,19 @@ interface SettingsSchema {
       muteCurrentActiveProcess: string;
     };
   };
+  stats: Record<string, StatsItem>;
 }
 
 export const settingsStore = new Store<SettingsSchema>({
   defaults: {
     selectedProcesses: [],
+    stats: {},
     settings: {
       preferredTheme: 'system',
       onStartup: true,
       keybindings: {
-        muteSelectedProcesses: 'Control+Alt+M',
-        muteCurrentActiveProcess: 'Control+Alt+N',
+        muteSelectedProcesses: 'F10',
+        muteCurrentActiveProcess: 'F11',
       },
     },
   },
