@@ -1,10 +1,11 @@
 import { spawn } from 'child_process';
 import { randomUUID } from 'crypto';
 import readline from 'readline';
+// import { logger } from 'main/logger';
 
 import { getMuterApiPath } from './muter-api.util';
 
-import type { Process } from '../../common/types';
+import type { Process, ProcessesMap } from '../../common/types';
 import type {
   MuterApiActiveProcess,
   MuterApiCommand,
@@ -28,8 +29,6 @@ export class MuterApiController {
     rl.on('line', (line) => {
       try {
         const response = JSON.parse(line) as MuterApiResponse;
-
-        // console.log(response);
 
         const requestResolveFunction = this.pendingRequests.get(
           response.RequestId,
@@ -79,33 +78,40 @@ export class MuterApiController {
     return response;
   }
 
-  async getProcessesList(): Promise<Record<string, Process[]>> {
+  async getProcessesList(): Promise<ProcessesMap> {
     const muterApiProcessGroups = (await this.sendCommand(
       'GET_PROCESSES_LIST',
     )) as MuterApiProcessGroup[];
 
-    const processes: Record<string, Process[]> = {};
+    const processes: ProcessesMap = {};
 
     for (const muterApiProcessGroup of muterApiProcessGroups) {
       const mappedProcesses: Process[] = muterApiProcessGroup.Instances.map(
         (instance) => {
           return {
             pid: instance.Id,
-            name: instance.Product,
-            title: instance.MainWindowTitle,
-            path: instance.Path,
+            processName: instance.ProcessName,
             description: instance.Description,
+            mainWindowTitle: instance.MainWindowTitle,
+            product: instance.Product,
           };
         },
       );
 
-      processes[muterApiProcessGroup.GroupName] = mappedProcesses;
+      processes[muterApiProcessGroup.GroupName] = {
+        icon: muterApiProcessGroup.GroupIcon,
+        processes: mappedProcesses,
+      };
     }
 
     return processes;
   }
 
-  async mute(pid: number): Promise<void> {
-    await this.sendCommand(`MUTE ${pid}`);
+  async mutePid(pid: number): Promise<void> {
+    await this.sendCommand(`MUTE_PID ${pid}`);
+  }
+
+  async muteProcess(processName: string): Promise<void> {
+    await this.sendCommand(`MUTE_PROCESS ${processName}`);
   }
 }

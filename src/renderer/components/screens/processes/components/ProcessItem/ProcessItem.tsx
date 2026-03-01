@@ -4,9 +4,9 @@ import ProcessIcon from 'renderer/components/ProcessIcon/ProcessIcon';
 
 import { Props } from './ProcessItem.types';
 
-function ProcessItem({ process }: Props) {
+function ProcessItem({ process, processIcon }: Props) {
   const getPrimaryTitle = () => {
-    return `${process.title || process.description || process.name}`;
+    return `${process.mainWindowTitle || process.description || process.product || process.processName}`;
   };
 
   const getSecondaryTitle = () => {
@@ -15,7 +15,7 @@ function ProcessItem({ process }: Props) {
 
   return (
     <ListItem disablePadding sx={{ pl: '72px' }}>
-      <ProcessIcon path={process.path} alt={process.description} />
+      <ProcessIcon base64={processIcon} alt={process.processName} />
       <ListItemText
         primary={getPrimaryTitle()}
         secondary={getSecondaryTitle()}

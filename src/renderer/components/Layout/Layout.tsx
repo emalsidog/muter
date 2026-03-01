@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from 'framer-motion';
-import { useEffect } from 'react';
+import { useLayoutEffect } from 'react';
 import { useLocation, useOutlet } from 'react-router-dom';
 
 import {
@@ -22,7 +22,7 @@ export default function Layout() {
   const { appSettings } = useAppState();
   const outlet = useOutlet();
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     setMode(appSettings.preferredTheme);
   }, [appSettings.preferredTheme, setMode]);
 

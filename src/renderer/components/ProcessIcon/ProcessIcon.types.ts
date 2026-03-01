@@ -1,4 +1,4 @@
 export interface Props {
-  path: string;
+  base64: string;
   alt: string;
 }

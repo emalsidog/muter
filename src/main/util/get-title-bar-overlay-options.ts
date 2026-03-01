@@ -1,17 +1,8 @@
-import { nativeTheme, TitleBarOverlayOptions } from 'electron';
-
-import { PreferredTheme } from '../../common/types';
+import { TitleBarOverlayOptions } from 'electron';
 
 export const getTitleBarOverlayOptions = (
-  theme: PreferredTheme,
+  effectiveTheme: 'dark' | 'light',
 ): TitleBarOverlayOptions => {
-  const effectiveTheme =
-    theme === 'system'
-      ? nativeTheme.shouldUseDarkColors
-        ? 'dark'
-        : 'light'
-      : theme;
-
   const options: TitleBarOverlayOptions = {
     height: 36,
   };

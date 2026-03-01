@@ -12,14 +12,15 @@ export interface MuterApiResponse {
 
 export interface MuterApiProcess {
   Id: number;
+  ProcessName: string;
   MainWindowTitle: string;
-  Path: string;
   Description: string;
   Product: string;
 }
 
 export interface MuterApiProcessGroup {
   GroupName: string;
+  GroupIcon: string;
   Instances: MuterApiProcess[];
 }
 

@@ -59,21 +59,28 @@ export class KeybindingsController {
         const processes = this.appStateController.get('processes');
         const selectedProcesses = settingsStore.get('selectedProcesses');
 
-        Object.entries(processes).forEach(([processName, instances]) => {
-          if (selectedProcesses.includes(processName)) {
-            instances.forEach(async (instance) => {
-              await this.muterApiController.mute(instance.pid);
-            });
+        Object.entries(processes).forEach(
+          ([processName, { icon, processes }]) => {
+            if (selectedProcesses.includes(processName)) {
+              this.muterApiController.muteProcess(processName);
 
-            this.statsController().updateStats({
-              processName,
-              processDetails: {
-                name: instances[0].description,
-                path: instances[0].path,
-              },
-            });
-          }
-        });
+              const proc = processes[0];
+
+              let processTitle =
+                proc.description || proc.mainWindowTitle || proc.processName;
+
+              if (processes.length > 1) {
+                processTitle = proc.description || proc.processName;
+              }
+
+              this.statsController().updateStats({
+                processName,
+                processIcon: icon,
+                processTitle,
+              });
+            }
+          },
+        );
       });
     } catch (error) {
       console.error(`Error during muting selected processes`, error);
@@ -98,19 +105,25 @@ export class KeybindingsController {
         const activeProcess = await this.muterApiController.getActiveProcess();
         const processes = this.appStateController.get('processes');
 
-        const instancesToMute = processes[activeProcess.processName] || [];
+        if (Object.keys(processes).includes(activeProcess.processName)) {
+          await this.muterApiController.muteProcess(activeProcess.processName);
 
-        instancesToMute.forEach(async (instance) => {
-          await this.muterApiController.mute(instance.pid);
-        });
+          const processGroupToMute = processes[activeProcess.processName];
+          const proc = processGroupToMute.processes[0];
 
-        this.statsController().updateStats({
-          processName: activeProcess.processName,
-          processDetails: {
-            name: instancesToMute[0].description,
-            path: instancesToMute[0].path,
-          },
-        });
+          let processTitle =
+            proc.description || proc.mainWindowTitle || proc.processName;
+
+          if (processGroupToMute.processes.length > 1) {
+            processTitle = proc.description || proc.processName;
+          }
+
+          this.statsController().updateStats({
+            processName: activeProcess.processName,
+            processIcon: processGroupToMute.icon,
+            processTitle,
+          });
+        }
       });
     } catch (error) {
       console.error(`Error during muting current active process`, error);

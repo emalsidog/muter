@@ -1,5 +1,5 @@
-import { Route, MemoryRouter as Router, Routes } from 'react-router-dom';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
+import { Route, MemoryRouter as Router, Routes } from 'react-router-dom';
 
 import Processes from './components/screens/processes/Processes';
 import Settings from './components/screens/settings/Settings';

@@ -1,4 +1,4 @@
-import { app, BrowserWindow, shell } from 'electron';
+import { app, BrowserWindow, nativeImage, nativeTheme, shell } from 'electron';
 
 import { settingsStore } from '../store';
 
@@ -26,11 +26,23 @@ export class MainWindowController {
     //   await this.installExtensions();
     // }
 
-    const titleBarOverlayOptions = getTitleBarOverlayOptions(
-      settingsStore.get('settings.preferredTheme'),
+    const preferredTheme = settingsStore.get('settings.preferredTheme');
+
+    const effectiveTheme =
+      preferredTheme === 'system'
+        ? nativeTheme.shouldUseDarkColors
+          ? 'dark'
+          : 'light'
+        : preferredTheme;
+
+    const titleBarOverlayOptions = getTitleBarOverlayOptions(effectiveTheme);
+
+    const windowIcon = nativeImage.createFromPath(
+      getAssetPath('icons/icon.ico'),
     );
 
     this.mainWindow = new BrowserWindow({
+      backgroundColor: effectiveTheme === 'dark' ? '#121212' : '#ffffff',
       titleBarStyle: 'hidden',
       titleBarOverlay: titleBarOverlayOptions,
       show: false,
@@ -38,7 +50,7 @@ export class MainWindowController {
       height: 728,
       minWidth: 700,
       minHeight: 350,
-      icon: getAssetPath('icon.png'),
+      icon: windowIcon,
       webPreferences: {
         preload: getPreloadPath(),
       },
