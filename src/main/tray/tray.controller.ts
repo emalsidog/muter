@@ -1,4 +1,10 @@
-import { app, Tray, Menu, MenuItemConstructorOptions } from 'electron';
+import {
+  app,
+  Tray,
+  Menu,
+  MenuItemConstructorOptions,
+  nativeImage,
+} from 'electron';
 
 import { AppStateController } from '../app-state/app-state.controller';
 import { MainWindowController } from '../main-window/main-window.controller';
@@ -12,7 +18,11 @@ export class TrayController {
   ) {}
 
   build(): Tray {
-    const tray = new Tray(getAssetPath('icon.png'));
+    const trayIcon = nativeImage.createFromPath(
+      getAssetPath('icons/icon.png'),
+    );
+
+    const tray = new Tray(trayIcon);
     const menu = Menu.buildFromTemplate(this.buildMenuTemplate());
 
     tray.setToolTip('Muter');

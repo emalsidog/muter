@@ -20,7 +20,7 @@ import { Props } from './ProcessGroup.types';
 
 const MotionIcon = motion(KeyboardArrowDownIcon);
 
-function ProcessGroup({ processName, processes }: Props) {
+function ProcessGroup({ processName, processIcon, processes }: Props) {
   const [isGroupOpen, set$isGroupOpen] = React.useState(false);
   const { appState, updateSelectedProcesses } = useAppState();
 
@@ -32,10 +32,12 @@ function ProcessGroup({ processName, processes }: Props) {
     const process = processes[0];
 
     if (processes.length > 1) {
-      return `${process.description} (${processes.length})`;
+      return `${process.description || process.processName} (${processes.length})`;
     }
 
-    return process.description;
+    return (
+      process.description || process.mainWindowTitle || process.processName
+    );
   };
 
   return (
@@ -59,10 +61,7 @@ function ProcessGroup({ processName, processes }: Props) {
             disableRipple
           />
 
-          <ProcessIcon
-            path={processes[0].path}
-            alt={processes[0].description}
-          />
+          <ProcessIcon base64={processIcon} alt={processes[0].description} />
 
           <ListItemText
             primary={getProcessGroupName()}
@@ -79,7 +78,11 @@ function ProcessGroup({ processName, processes }: Props) {
       <Collapse in={isGroupOpen} timeout="auto" unmountOnExit>
         <List component="div" disablePadding>
           {processes.map((process) => (
-            <ProcessItem key={process.pid} process={process} />
+            <ProcessItem
+              key={process.pid}
+              process={process}
+              processIcon={processIcon}
+            />
           ))}
         </List>
       </Collapse>

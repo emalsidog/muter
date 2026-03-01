@@ -6,6 +6,8 @@ import { isDebug } from './util';
 
 import { AppController } from './app/app.controller';
 
+import { logger } from './logger';
+
 const gotTheLock = app.requestSingleInstanceLock();
 
 if (!gotTheLock) {
@@ -27,7 +29,7 @@ const main = async () => {
     const appController = new AppController();
     await appController.init();
   } catch (error) {
-    console.error(`Error starting app`, error);
+    logger.error(`Error starting app`, error);
     app.quit();
   }
 };

@@ -10,15 +10,15 @@ export class StatsController {
   constructor(private getMainWindowController: () => MainWindowController) {}
 
   updateStats(payload: UpdateStatsPayload) {
-    const { processName, processDetails } = payload;
+    const { processName, processIcon, processTitle } = payload;
 
     const currentStats = { ...settingsStore.get('stats') };
 
     const existingStat = currentStats[processName] || {};
 
     const updatedStat: StatsItem = {
-      name: processDetails.name || existingStat.name,
-      path: processDetails.path || existingStat.path,
+      processTitle,
+      processIcon,
       totalToggles: (existingStat.totalToggles || 0) + 1,
       lastToggle: new Date().toISOString(),
     };

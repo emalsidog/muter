@@ -3,7 +3,6 @@ import { app } from 'electron';
 import { IpcController } from '../ipc/ipc.controller';
 import { MainWindowController } from '../main-window/main-window.controller';
 import { MuterApiController } from '../muter-api/muter-api.controller';
-import { ProtocolController } from '../protocol/protocol.controller';
 import { AppStateController } from '../app-state/app-state.controller';
 import { KeybindingsController } from '../keybindings/keybindings.controller';
 import { NativeThemeController } from '../theme/native-theme.controller';
@@ -16,7 +15,6 @@ import { settingsStore } from '../store';
 export class AppController {
   private appStateController = new AppStateController();
   private muterApiController = new MuterApiController();
-  private protocolController = new ProtocolController();
   private keybindingsController = new KeybindingsController(
     this.appStateController,
     this.muterApiController,
@@ -57,7 +55,6 @@ export class AppController {
 
       await this.processesController.start();
 
-      this.protocolController.init();
       this.keybindingsController.registerAll();
       this.ipcController.init();
       this.trayController.build();

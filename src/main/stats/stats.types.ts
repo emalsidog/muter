@@ -1,7 +1,7 @@
+import { Process } from 'common/types';
+
 export interface UpdateStatsPayload {
   processName: string;
-  processDetails: {
-    name: string;
-    path: string;
-  };
+  processIcon: string;
+  processTitle: string;
 }

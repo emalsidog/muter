@@ -50,13 +50,16 @@ function Stats() {
               .sort((a, b) => b.totalToggles - a.totalToggles)
               .map((stat) => (
                 <TableRow
-                  key={stat.name}
+                  key={stat.processTitle}
                   sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
                 >
                   <TableCell component="th" scope="row">
                     <Stack alignItems="center" direction="row" gap="8px">
-                      <ProcessIcon path={stat.path} alt={stat.name} />
-                      {stat.name}
+                      <ProcessIcon
+                        base64={stat.processIcon}
+                        alt={stat.processTitle}
+                      />
+                      {stat.processTitle}
                     </Stack>
                   </TableCell>
                   <TableCell>{stat.totalToggles}</TableCell>

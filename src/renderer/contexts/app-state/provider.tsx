@@ -9,11 +9,11 @@ import {
 import { Channels } from 'main/ipc/ipc.types';
 import { ipcRenderer } from 'renderer/ipc-renderer';
 
-import type { PreferredTheme, Process, StatsItem } from 'common/types';
+import type { PreferredTheme, ProcessesMap, StatsItem } from 'common/types';
 import { AppSettings, AppStateContext, defaultValue } from './types';
 
 function AppStateProvider({ children }: PropsWithChildren) {
-  const [processes, set$processes] = useState<Record<string, Process[]>>({});
+  const [processes, set$processes] = useState<ProcessesMap>({});
   const [selectedProcesses, set$selectedProcesses] = useState<string[]>([]);
   const [stats, set$stats] = useState<Record<string, StatsItem>>({});
   const [settings, set$settings] = useState<AppSettings>(

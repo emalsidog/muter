@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { AnimatePresence, motion } from 'framer-motion';
 
-import { List, Toolbar } from '@mui/material';
+import { Box, List, Toolbar, Typography } from '@mui/material';
 
 import { Drawer } from './Sidebar.styled';
 import SidebarItem from './components/SidebarItem/SidebarItem';
@@ -44,6 +45,25 @@ function Sidebar() {
           );
         })}
       </List>
+
+      <Box sx={{ marginTop: 'auto', padding: '12px' }}>
+        <AnimatePresence mode="popLayout">
+          {open ? (
+            <motion.div
+              key="version"
+              layout
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              <Typography fontSize="10px" color="textSecondary">
+                stable 1.2.0
+              </Typography>
+            </motion.div>
+          ) : null}
+        </AnimatePresence>
+      </Box>
     </Drawer>
   );
 }

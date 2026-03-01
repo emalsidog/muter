@@ -1,5 +1,6 @@
 import { createContext } from 'react';
-import type { PreferredTheme, Process, StatsItem } from 'common/types';
+
+import type { PreferredTheme, ProcessesMap, StatsItem } from 'common/types';
 
 export interface AppSettings {
   preferredTheme: PreferredTheme;
@@ -11,7 +12,7 @@ export interface AppSettings {
 }
 
 interface AppState {
-  processes: Record<string, Process[]>;
+  processes: ProcessesMap;
   selectedProcesses: string[];
   processesSearch: string;
   stats: Record<string, StatsItem>;
