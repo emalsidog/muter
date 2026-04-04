@@ -9,6 +9,7 @@ export enum Channels {
   GET_SETTINGS = 'get-settings',
   GET_SELECTED_PROCESSES = 'get-selected-processes',
   GET_STATS = 'get-stats',
+  GET_PROCESSES = 'get-processes',
 
   SET_SELECTED_PROCESSES = 'set-selected-processes',
   SET_MUTE_SELECTED_PROCESSES_KEYBINDING = 'set-mute-selected-processes-keybinding',

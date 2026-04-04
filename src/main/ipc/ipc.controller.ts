@@ -1,4 +1,4 @@
-import { app, ipcMain } from 'electron';
+import { app, ipcMain, nativeTheme } from 'electron';
 
 import { settingsStore } from '../store';
 
@@ -9,7 +9,7 @@ import { KeybindingsController } from '../keybindings/keybindings.controller';
 import { Channels } from './ipc.types';
 import { PreferredTheme } from '../../common/types';
 
-import { getTitleBarOverlayOptions } from '../util';
+import { getTitleBarOverlayOptions, getEffectiveTheme } from '../util';
 
 export class IpcController {
   constructor(
@@ -29,6 +29,10 @@ export class IpcController {
 
     ipcMain.handle(Channels.GET_STATS, () => {
       return settingsStore.get('stats');
+    });
+
+    ipcMain.handle(Channels.GET_PROCESSES, () => {
+      return this.appStateController.get('processes');
     });
 
     ipcMain.on(
@@ -61,8 +65,10 @@ export class IpcController {
       (e, newPreferredTheme: PreferredTheme) => {
         settingsStore.set('settings.preferredTheme', newPreferredTheme);
 
+        const effectiveTheme = getEffectiveTheme(newPreferredTheme);
+
         const titleBarOverlayOptions =
-          getTitleBarOverlayOptions(newPreferredTheme);
+          getTitleBarOverlayOptions(effectiveTheme);
 
         this.mainWindowController.mainWindow?.setTitleBarOverlay(
           titleBarOverlayOptions,

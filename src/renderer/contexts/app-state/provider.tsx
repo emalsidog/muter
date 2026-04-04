@@ -52,6 +52,15 @@ function AppStateProvider({ children }: PropsWithChildren) {
     }
   };
 
+  const getProcesses = async () => {
+    try {
+      const processesList = await ipcRenderer.invoke(Channels.GET_PROCESSES);
+      set$processes(processesList);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   const updateKeybinding = useCallback(
     (
       name: 'muteSelectedProcesses' | 'muteCurrentActiveProcess',
@@ -141,6 +150,7 @@ function AppStateProvider({ children }: PropsWithChildren) {
     getSelectedProcesses();
     getSettings();
     getStats();
+    getProcesses();
   }, []);
 
   useEffect(() => {

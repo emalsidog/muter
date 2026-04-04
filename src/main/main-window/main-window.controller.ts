@@ -6,11 +6,11 @@ import { AppStateController } from '../app-state/app-state.controller';
 import { KeybindingsController } from '../keybindings/keybindings.controller';
 
 import {
-  isDebug,
   getAssetPath,
   getTitleBarOverlayOptions,
   getPreloadPath,
   resolveHtmlPath,
+  getEffectiveTheme,
 } from '../util';
 
 export class MainWindowController {
@@ -22,19 +22,8 @@ export class MainWindowController {
   ) {}
 
   async create() {
-    // if (isDebug()) {
-    //   await this.installExtensions();
-    // }
-
     const preferredTheme = settingsStore.get('settings.preferredTheme');
-
-    const effectiveTheme =
-      preferredTheme === 'system'
-        ? nativeTheme.shouldUseDarkColors
-          ? 'dark'
-          : 'light'
-        : preferredTheme;
-
+    const effectiveTheme = getEffectiveTheme(preferredTheme);
     const titleBarOverlayOptions = getTitleBarOverlayOptions(effectiveTheme);
 
     const windowIcon = nativeImage.createFromPath(
