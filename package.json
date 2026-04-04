@@ -220,7 +220,12 @@
     "win": {
       "target": [
         "nsis"
-      ]
+      ],
+      "icon": "assets/icons/icon.ico"
+    },
+    "nsis": {
+      "installerIcon": "assets/icons/icon.ico",
+      "uninstallerIcon": "assets/icons/icon.ico"
     },
     "linux": {
       "target": [
