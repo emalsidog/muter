@@ -19,7 +19,7 @@ export class TrayController {
 
   build(): Tray {
     const trayIcon = nativeImage.createFromPath(
-      getAssetPath('icons/icon.png'),
+      getAssetPath('icons/icon.ico'),
     );
 
     const tray = new Tray(trayIcon);
