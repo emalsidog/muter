@@ -2,9 +2,9 @@ import { globalShortcut } from 'electron';
 
 import { settingsStore } from '../store';
 
-import { MuterApiController } from '../muter-api/muter-api.controller';
-import { AppStateController } from '../app-state/app-state.controller';
-import { StatsController } from '../stats/stats.controller';
+import { MuterApiController } from 'main/muter-api/muter-api.controller';
+import { AppStateController } from 'main/app-state/app-state.controller';
+import { StatsController } from 'main/stats/stats.controller';
 
 export class KeybindingsController {
   constructor(
@@ -59,28 +59,20 @@ export class KeybindingsController {
         const processes = this.appStateController.get('processes');
         const selectedProcesses = settingsStore.get('selectedProcesses');
 
-        Object.entries(processes).forEach(
-          ([processName, { icon, processes }]) => {
-            if (selectedProcesses.includes(processName)) {
-              this.muterApiController.muteProcess(processName);
+        Object.entries(processes).forEach(([processName, process]) => {
+          if (selectedProcesses.includes(processName)) {
+            this.muterApiController.muteProcess(processName);
 
-              const proc = processes[0];
+            let processTitle =
+              process.product || process.mainWindowTitle || process.processName;
 
-              let processTitle =
-                proc.description || proc.mainWindowTitle || proc.processName;
-
-              if (processes.length > 1) {
-                processTitle = proc.description || proc.processName;
-              }
-
-              this.statsController().updateStats({
-                processName,
-                processIcon: icon,
-                processTitle,
-              });
-            }
-          },
-        );
+            this.statsController().updateStats({
+              processName,
+              processIcon: process.icon,
+              processTitle,
+            });
+          }
+        });
       });
     } catch (error) {
       console.error(`Error during muting selected processes`, error);
@@ -108,19 +100,16 @@ export class KeybindingsController {
         if (Object.keys(processes).includes(activeProcess.processName)) {
           await this.muterApiController.muteProcess(activeProcess.processName);
 
-          const processGroupToMute = processes[activeProcess.processName];
-          const proc = processGroupToMute.processes[0];
+          const processToMute = processes[activeProcess.processName];
 
           let processTitle =
-            proc.description || proc.mainWindowTitle || proc.processName;
-
-          if (processGroupToMute.processes.length > 1) {
-            processTitle = proc.description || proc.processName;
-          }
+            processToMute.product ||
+            processToMute.mainWindowTitle ||
+            processToMute.processName;
 
           this.statsController().updateStats({
             processName: activeProcess.processName,
-            processIcon: processGroupToMute.icon,
+            processIcon: processToMute.icon,
             processTitle,
           });
         }

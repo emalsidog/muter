@@ -14,16 +14,15 @@ export interface MuterApiProcess {
   Id: number;
   ProcessName: string;
   MainWindowTitle: string;
-  Description: string;
   Product: string;
+  Icon: string;
+  Muted: boolean;
 }
 
-export interface MuterApiProcessGroup {
-  GroupName: string;
-  GroupIcon: string;
-  Instances: MuterApiProcess[];
-}
-
-export interface MuterApiActiveProcess {
+export interface MuterApiActiveProcessData {
   processName: string;
+}
+
+export interface MuterApiProcessesListData {
+  processes: MuterApiProcess[];
 }

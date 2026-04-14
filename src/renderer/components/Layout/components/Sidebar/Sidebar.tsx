@@ -58,7 +58,7 @@ function Sidebar() {
               transition={{ duration: 0.2 }}
             >
               <Typography fontSize="10px" color="textSecondary">
-                stable 1.2.1
+                beta 1.3.0
               </Typography>
             </motion.div>
           ) : null}
