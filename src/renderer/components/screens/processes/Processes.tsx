@@ -1,4 +1,4 @@
-import { Stack, Typography } from '@mui/material';
+import { List, Stack, Typography } from '@mui/material';
 import { useMemo } from 'react';
 
 import { prepareILikeRegexp } from 'renderer/utils/prepare-ilike-regexp';
@@ -8,7 +8,7 @@ import useAppState from 'renderer/contexts/app-state/useAppState';
 import { ProcessesMap } from 'common/types';
 
 import Container from 'renderer/components/Container/Container';
-import ProcessGroup from './components/ProcessGroup/ProcessGroup';
+import ProcessItem from './components/ProcessItem/ProcessItem';
 
 function Processes() {
   const { appState } = useAppState();
@@ -17,13 +17,9 @@ function Processes() {
     const iLikeRegexp = prepareILikeRegexp(`%${appState.processesSearch}%`);
 
     const filteredProcesses = Object.entries(appState.processes).reduce(
-      (acc, [name, { processes, ...rest }]) => {
-        if (
-          processes.some((process) =>
-            iLikeRegexp.test(process.description || process.processName),
-          )
-        ) {
-          acc[name] = { processes, ...rest };
+      (acc, [name, process]) => {
+        if (iLikeRegexp.test(process.product)) {
+          acc[name] = process;
         }
 
         return acc;
@@ -41,16 +37,13 @@ function Processes() {
       </Typography>
 
       <Container>
-        {Object.entries(processesList).map(
-          ([processName, { icon, processes }]) => (
-            <ProcessGroup
-              key={processName}
-              processName={processName}
-              processIcon={icon}
-              processes={processes}
-            />
-          ),
-        )}
+        <List dense sx={{ py: 0 }}>
+          {Object.values(processesList)
+            .sort((a, b) => Number(b.muted) - Number(a.muted))
+            .map((process) => (
+              <ProcessItem key={process.pid} process={process} />
+            ))}
+        </List>
       </Container>
     </Stack>
   );

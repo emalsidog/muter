@@ -1,34 +1,62 @@
-import { ListItem, ListItemText } from '@mui/material';
+import {
+  Box,
+  Checkbox,
+  ListItem,
+  ListItemButton,
+  ListItemText,
+  Typography,
+} from '@mui/material';
+
+import useAppState from 'renderer/contexts/app-state/useAppState';
 
 import ProcessIcon from 'renderer/components/ProcessIcon/ProcessIcon';
 
 import { Props } from './ProcessItem.types';
 
-function ProcessItem({ process, processIcon }: Props) {
-  const getPrimaryTitle = () => {
-    return `${process.mainWindowTitle || process.description || process.product || process.processName}`;
-  };
+function ProcessItem({ process }: Props) {
+  const { appState, updateSelectedProcesses } = useAppState();
 
-  const getSecondaryTitle = () => {
-    return `PID: ${process.pid}`;
+  const getPrimaryTitle = () => {
+    return (
+      <Box display="flex" alignItems="center" gap="8px">
+        <Typography>
+          {`${process.product || process.mainWindowTitle || process.processName}`}
+        </Typography>
+
+        {process.muted ? (
+          <Typography fontWeight="bold" variant="subtitle2" color="primary">
+            (muted)
+          </Typography>
+        ) : null}
+      </Box>
+    );
   };
 
   return (
-    <ListItem disablePadding sx={{ pl: '72px' }}>
-      <ProcessIcon base64={processIcon} alt={process.processName} />
-      <ListItemText
-        primary={getPrimaryTitle()}
-        secondary={getSecondaryTitle()}
-        sx={{ ml: '12px' }}
-        slotProps={{
-          primary: {
-            fontSize: '14px',
-          },
-          secondary: {
-            fontSize: '12px',
-          },
-        }}
-      />
+    <ListItem disablePadding>
+      <ListItemButton
+        sx={{ pt: 0, pb: 0 }}
+        onClick={() => updateSelectedProcesses(process.processName)}
+      >
+        <Checkbox
+          edge="start"
+          checked={appState.selectedProcesses.includes(process.processName)}
+          tabIndex={-1}
+          disableRipple
+        />
+
+        <ProcessIcon base64={process.icon} alt={process.processName} />
+
+        <ListItemText
+          primary={getPrimaryTitle()}
+          sx={{ ml: '12px' }}
+          slotProps={{
+            primary: {
+              fontSize: '16px',
+            },
+          }}
+        />
+      </ListItemButton>
     </ListItem>
   );
 }

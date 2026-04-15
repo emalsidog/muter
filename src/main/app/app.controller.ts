@@ -67,19 +67,9 @@ export class AppController {
   }
 
   private handleInitialVisibility() {
-    const loginSettings = app.getLoginItemSettings();
     const settings = settingsStore.get('settings');
 
-    app.setLoginItemSettings({
-      openAtLogin: settings.onStartup ?? false,
-      path: process.execPath,
-      args: ['--hidden'],
-    });
-
-    const wasOpenedBySystem =
-      loginSettings.wasOpenedAtLogin || process.argv.includes('--hidden');
-
-    if (!wasOpenedBySystem) {
+    if (!settings.startMinimized) {
       this.mainWindowController.create();
     }
   }

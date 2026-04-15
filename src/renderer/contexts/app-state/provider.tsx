@@ -146,6 +146,18 @@ function AppStateProvider({ children }: PropsWithChildren) {
     [settings],
   );
 
+  const updateStartMinimized = useCallback(
+    (newStartMinimized: boolean) => {
+      set$settings({
+        ...settings,
+        startMinimized: newStartMinimized,
+      });
+
+      ipcRenderer.send(Channels.SET_START_MINIMIZED, newStartMinimized);
+    },
+    [settings],
+  );
+
   useEffect(() => {
     getSelectedProcesses();
     getSettings();
@@ -201,6 +213,7 @@ function AppStateProvider({ children }: PropsWithChildren) {
       updateProcessesSearch,
       updateSelectedProcesses,
       updateOnStartup,
+      updateStartMinimized,
     }),
     [
       stats,
@@ -213,6 +226,7 @@ function AppStateProvider({ children }: PropsWithChildren) {
       updateProcessesSearch,
       updateSelectedProcesses,
       updateOnStartup,
+      updateStartMinimized,
     ],
   );
 

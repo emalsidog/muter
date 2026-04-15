@@ -90,6 +90,10 @@ export class IpcController {
       });
     });
 
+    ipcMain.on(Channels.SET_START_MINIMIZED, (e, enabled: boolean) => {
+      settingsStore.set('settings.startMinimized', enabled);
+    });
+
     ipcMain.on(Channels.DISABLE_KEYBINDINGS, () => {
       this.keybindingsController.unregisterAll();
       this.appStateController.set('keyBindsEnabled', false);
