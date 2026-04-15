@@ -21,6 +21,7 @@ function Settings() {
     updateKeybinding,
     updatePreferredTheme,
     updateOnStartup,
+    updateStartMinimized,
   } = useAppState();
   const { width } = useWindowSize();
 
@@ -37,6 +38,12 @@ function Settings() {
 
   const handleOnStartupChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     updateOnStartup(e.target.checked);
+  };
+
+  const handleStartMinimizedChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    updateStartMinimized(e.target.checked);
   };
 
   return (
@@ -101,6 +108,26 @@ function Settings() {
         <Switch
           checked={appSettings.onStartup}
           onChange={handleOnStartupChange}
+        />
+      </Stack>
+
+      <Stack
+        direction="row"
+        alignItems="center"
+        justifyContent="space-between"
+        gap="8px"
+        maxWidth={width < 1040 ? '100%' : '50%'}
+        flex={1}
+      >
+        <Typography
+          color={appSettings.onStartup ? 'text.primary' : 'text.disabled'}
+        >
+          Start Minimized
+        </Typography>
+        <Switch
+          checked={appSettings.startMinimized}
+          onChange={handleStartMinimizedChange}
+          disabled={!appSettings.onStartup}
         />
       </Stack>
     </Stack>

@@ -7,6 +7,7 @@ interface SettingsSchema {
   settings: {
     preferredTheme: PreferredTheme;
     onStartup: boolean;
+    startMinimized: boolean;
     keybindings: {
       muteSelectedProcesses: string;
       muteCurrentActiveProcess: string;
@@ -22,6 +23,7 @@ export const settingsStore = new Store<SettingsSchema>({
     settings: {
       preferredTheme: 'system',
       onStartup: true,
+      startMinimized: false,
       keybindings: {
         muteSelectedProcesses: 'F10',
         muteCurrentActiveProcess: 'F11',

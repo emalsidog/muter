@@ -5,6 +5,7 @@ import type { PreferredTheme, ProcessesMap, StatsItem } from 'common/types';
 export interface AppSettings {
   preferredTheme: PreferredTheme;
   onStartup: boolean;
+  startMinimized: boolean;
   keybindings: {
     muteSelectedProcesses: string;
     muteCurrentActiveProcess: string;
@@ -29,12 +30,14 @@ export interface IAppStateContext {
   updateProcessesSearch: (newProcessesSearch: string) => void;
   updateSelectedProcesses: (selectedProcess: string) => void;
   updateOnStartup: (newOnStartup: boolean) => void;
+  updateStartMinimized: (newStartMinimized: boolean) => void;
 }
 
 export const defaultValue: IAppStateContext = {
   appSettings: {
     preferredTheme: 'system',
     onStartup: true,
+    startMinimized: false,
     keybindings: {
       muteCurrentActiveProcess: 'F10',
       muteSelectedProcesses: 'F11',
@@ -51,6 +54,7 @@ export const defaultValue: IAppStateContext = {
   updateProcessesSearch: () => {},
   updateSelectedProcesses: () => {},
   updateOnStartup: () => {},
+  updateStartMinimized: () => {},
 };
 
 export const AppStateContext = createContext<IAppStateContext>(defaultValue);

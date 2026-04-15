@@ -16,4 +16,5 @@ export enum Channels {
   SET_MUTE_CURRENT_ACTIVE_PROCESS_KEYBINDING = 'set-mute-current-active-process-keybinding',
   SET_PREFERRED_THEME = 'set-preferred-theme',
   SET_STARTUP_ENABLED = 'set-startup-enabled',
+  SET_START_MINIMIZED = 'set-start-minimized',
 }
