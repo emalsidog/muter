@@ -1,8 +1,8 @@
 import { MainWindowController } from '../main-window/main-window.controller';
 
-import { settingsStore } from '../store';
+import { store } from '../store';
 
-import { StatsItem } from '../../common/types';
+import { StatsItem } from 'common/types';
 import { Channels } from '../ipc/ipc.types';
 import type { UpdateStatsPayload } from './stats.types';
 
@@ -12,7 +12,7 @@ export class StatsController {
   updateStats(payload: UpdateStatsPayload) {
     const { processName, processIcon, processTitle } = payload;
 
-    const currentStats = { ...settingsStore.get('stats') };
+    const currentStats = { ...store.get('stats') };
 
     const existingStat = currentStats[processName] || {};
 
@@ -25,7 +25,7 @@ export class StatsController {
 
     currentStats[processName] = updatedStat;
 
-    settingsStore.set('stats', currentStats);
+    store.set('stats', currentStats);
 
     const { mainWindow } = this.getMainWindowController();
 

@@ -5,7 +5,7 @@ import readline from 'readline';
 
 import { getMuterApiPath } from './muter-api.util';
 
-import type { Process, ProcessesMap } from '../../common/types';
+import type { Process, ProcessesMap } from 'common/types';
 import type {
   MuterApiActiveProcessData,
   MuterApiCommand,
@@ -89,7 +89,6 @@ export class MuterApiController {
       const mappedProcess: Process = {
         pid: process.Id,
         processName: process.ProcessName,
-        mainWindowTitle: process.MainWindowTitle,
         product: process.Product,
         icon: process.Icon,
         muted: process.Muted,
@@ -101,7 +100,7 @@ export class MuterApiController {
     return processes;
   }
 
-  async muteProcess(processName: string): Promise<void> {
-    await this.sendCommand(`MUTE_PROCESS ${processName}`);
+  async muteProcess(processPid: number): Promise<void> {
+    await this.sendCommand(`MUTE_PROCESS ${processPid}`);
   }
 }

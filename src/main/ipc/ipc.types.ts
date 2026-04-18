@@ -17,4 +17,6 @@ export enum Channels {
   SET_PREFERRED_THEME = 'set-preferred-theme',
   SET_STARTUP_ENABLED = 'set-startup-enabled',
   SET_START_MINIMIZED = 'set-start-minimized',
+
+  OVERLAY_NOTIFICATION = 'overlay-notification',
 }

@@ -1,6 +1,6 @@
 import { nativeTheme } from 'electron';
 
-import { settingsStore } from '../store';
+import { store } from '../store';
 
 import { getTitleBarOverlayOptions } from '../util';
 
@@ -11,10 +11,11 @@ export class NativeThemeController {
 
   init() {
     nativeTheme.on('updated', () => {
-      const preferredTheme = settingsStore.get('settings.preferredTheme');
+      const preferredTheme = store.get('settings').preferredTheme;
       const mainWindow = this.mainWindowController.mainWindow;
 
       if (preferredTheme === 'system') {
+        // TODO
         const titleBarOverlayOptions =
           getTitleBarOverlayOptions(preferredTheme);
 

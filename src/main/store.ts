@@ -1,33 +1,22 @@
 import Store from 'electron-store';
+import { merge } from 'lodash';
 
-import type { PreferredTheme, StatsItem } from 'common/types';
+import type { AppSettings, StatsItem } from 'common/types';
+import { DEFAULT_APP_SETTINGS } from 'common/constants';
 
 interface SettingsSchema {
   selectedProcesses: string[];
-  settings: {
-    preferredTheme: PreferredTheme;
-    onStartup: boolean;
-    startMinimized: boolean;
-    keybindings: {
-      muteSelectedProcesses: string;
-      muteCurrentActiveProcess: string;
-    };
-  };
+  settings: AppSettings;
   stats: Record<string, StatsItem>;
 }
 
-export const settingsStore = new Store<SettingsSchema>({
+export const store = new Store<SettingsSchema>({
   defaults: {
     selectedProcesses: [],
     stats: {},
-    settings: {
-      preferredTheme: 'system',
-      onStartup: true,
-      startMinimized: false,
-      keybindings: {
-        muteSelectedProcesses: 'F10',
-        muteCurrentActiveProcess: 'F11',
-      },
-    },
+    settings: DEFAULT_APP_SETTINGS,
   },
 });
+
+const currentSettings = store.get('settings');
+store.set('settings', merge({}, DEFAULT_APP_SETTINGS, currentSettings));

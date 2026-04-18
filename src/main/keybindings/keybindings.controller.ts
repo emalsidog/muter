@@ -1,22 +1,22 @@
 import { globalShortcut } from 'electron';
 
-import { settingsStore } from '../store';
+import { store } from '../store';
 
 import { MuterApiController } from 'main/muter-api/muter-api.controller';
 import { AppStateController } from 'main/app-state/app-state.controller';
 import { StatsController } from 'main/stats/stats.controller';
+import { OverlayWindowController } from 'main/overlay-window/overlay-window.controller';
 
 export class KeybindingsController {
   constructor(
     private appStateController: AppStateController,
     private muterApiController: MuterApiController,
+    private overlayWindowController: OverlayWindowController,
     private statsController: () => StatsController,
   ) {}
 
   unregisterMuteSelectedProcesses() {
-    const keybinding = settingsStore.get(
-      'settings.keybindings.muteSelectedProcesses',
-    );
+    const keybinding = store.get('settings').keybindings.muteSelectedProcesses;
 
     if (!keybinding) {
       return;
@@ -28,9 +28,8 @@ export class KeybindingsController {
   }
 
   unregisterMuteCurrentActiveProcess() {
-    const keybinding = settingsStore.get(
-      'settings.keybindings.muteCurrentActiveProcess',
-    );
+    const keybinding =
+      store.get('settings').keybindings.muteCurrentActiveProcess;
 
     if (!keybinding) {
       return;
@@ -43,9 +42,8 @@ export class KeybindingsController {
 
   registerMuteSelectedProcesses() {
     try {
-      const keybinding = settingsStore.get(
-        'settings.keybindings.muteSelectedProcesses',
-      );
+      const keybinding =
+        store.get('settings').keybindings.muteSelectedProcesses;
 
       if (!keybinding) {
         return;
@@ -57,14 +55,19 @@ export class KeybindingsController {
 
       globalShortcut.register(keybinding, async () => {
         const processes = this.appStateController.get('processes');
-        const selectedProcesses = settingsStore.get('selectedProcesses');
+        const selectedProcesses = store.get('selectedProcesses');
 
         Object.entries(processes).forEach(([processName, process]) => {
           if (selectedProcesses.includes(processName)) {
-            this.muterApiController.muteProcess(processName);
+            this.muterApiController.muteProcess(process.pid);
 
-            let processTitle =
-              process.product || process.mainWindowTitle || process.processName;
+            let processTitle = process.product || process.processName;
+
+            this.overlayWindowController.sendNotification({
+              title: processTitle,
+              description: `Toggled mute`,
+              icon: process.icon,
+            })
 
             this.statsController().updateStats({
               processName,
@@ -81,9 +84,8 @@ export class KeybindingsController {
 
   registerMuteCurrentActiveProcess() {
     try {
-      const keybinding = settingsStore.get(
-        'settings.keybindings.muteCurrentActiveProcess',
-      );
+      const keybinding =
+        store.get('settings').keybindings.muteCurrentActiveProcess;
 
       if (!keybinding) {
         return;
@@ -98,14 +100,12 @@ export class KeybindingsController {
         const processes = this.appStateController.get('processes');
 
         if (Object.keys(processes).includes(activeProcess.processName)) {
-          await this.muterApiController.muteProcess(activeProcess.processName);
+          const process = processes[activeProcess.processName];
+          await this.muterApiController.muteProcess(process.pid);
 
           const processToMute = processes[activeProcess.processName];
 
-          let processTitle =
-            processToMute.product ||
-            processToMute.mainWindowTitle ||
-            processToMute.processName;
+          let processTitle = processToMute.product || processToMute.processName;
 
           this.statsController().updateStats({
             processName: activeProcess.processName,

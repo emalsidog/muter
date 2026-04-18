@@ -1,6 +1,6 @@
 import { app, BrowserWindow, nativeImage, nativeTheme, shell } from 'electron';
 
-import { settingsStore } from '../store';
+import { store } from '../store';
 
 import { AppStateController } from '../app-state/app-state.controller';
 import { KeybindingsController } from '../keybindings/keybindings.controller';
@@ -22,7 +22,7 @@ export class MainWindowController {
   ) {}
 
   async create() {
-    const preferredTheme = settingsStore.get('settings.preferredTheme');
+    const preferredTheme = store.get('settings').preferredTheme;
     const effectiveTheme = getEffectiveTheme(preferredTheme);
     const titleBarOverlayOptions = getTitleBarOverlayOptions(effectiveTheme);
 

@@ -9,15 +9,18 @@ import { NativeThemeController } from '../theme/native-theme.controller';
 import { TrayController } from '../tray/tray.controller';
 import { ProcessesController } from '../interval/processes.controller';
 import { StatsController } from '../stats/stats.controller';
+import { OverlayWindowController } from 'main/overlay-window/overlay-window.controller';
 
-import { settingsStore } from '../store';
+import { store } from '../store';
 
 export class AppController {
   private appStateController = new AppStateController();
   private muterApiController = new MuterApiController();
+  private overlayWindowController = new OverlayWindowController();
   private keybindingsController = new KeybindingsController(
     this.appStateController,
     this.muterApiController,
+    this.overlayWindowController,
     (): StatsController => this.statsController,
   );
   private mainWindowController = new MainWindowController(
@@ -55,6 +58,7 @@ export class AppController {
 
       await this.processesController.start();
 
+      this.overlayWindowController.create();
       this.keybindingsController.registerAll();
       this.ipcController.init();
       this.trayController.build();
@@ -67,7 +71,7 @@ export class AppController {
   }
 
   private handleInitialVisibility() {
-    const settings = settingsStore.get('settings');
+    const settings = store.get('settings');
 
     if (!settings.startMinimized) {
       this.mainWindowController.create();

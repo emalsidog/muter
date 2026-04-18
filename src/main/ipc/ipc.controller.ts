@@ -1,13 +1,13 @@
 import { app, ipcMain, nativeTheme } from 'electron';
 
-import { settingsStore } from '../store';
+import { store } from '../store';
 
 import { AppStateController } from '../app-state/app-state.controller';
 import { MainWindowController } from '../main-window/main-window.controller';
 import { KeybindingsController } from '../keybindings/keybindings.controller';
 
 import { Channels } from './ipc.types';
-import { PreferredTheme } from '../../common/types';
+import { PreferredTheme } from 'common/types';
 
 import { getTitleBarOverlayOptions, getEffectiveTheme } from '../util';
 
@@ -20,15 +20,15 @@ export class IpcController {
 
   init() {
     ipcMain.handle(Channels.GET_SETTINGS, () => {
-      return settingsStore.get('settings');
+      return store.get('settings');
     });
 
     ipcMain.handle(Channels.GET_SELECTED_PROCESSES, () => {
-      return settingsStore.get('selectedProcesses');
+      return store.get('selectedProcesses');
     });
 
     ipcMain.handle(Channels.GET_STATS, () => {
-      return settingsStore.get('stats');
+      return store.get('stats');
     });
 
     ipcMain.handle(Channels.GET_PROCESSES, () => {
@@ -40,7 +40,7 @@ export class IpcController {
       (e, newKey: string) => {
         this.keybindingsController.unregisterMuteSelectedProcesses();
 
-        settingsStore.set('settings.keybindings.muteSelectedProcesses', newKey);
+        store.set('settings.keybindings.muteSelectedProcesses', newKey);
 
         this.keybindingsController.registerMuteSelectedProcesses();
       },
@@ -51,7 +51,7 @@ export class IpcController {
       (e, newKey: string) => {
         this.keybindingsController.unregisterMuteCurrentActiveProcess();
 
-        settingsStore.set(
+        store.set(
           'settings.keybindings.muteCurrentActiveProcess',
           newKey,
         );
@@ -63,7 +63,7 @@ export class IpcController {
     ipcMain.on(
       Channels.SET_PREFERRED_THEME,
       (e, newPreferredTheme: PreferredTheme) => {
-        settingsStore.set('settings.preferredTheme', newPreferredTheme);
+        store.set('settings.preferredTheme', newPreferredTheme);
 
         const effectiveTheme = getEffectiveTheme(newPreferredTheme);
 
@@ -77,11 +77,11 @@ export class IpcController {
     );
 
     ipcMain.on(Channels.SET_SELECTED_PROCESSES, (e, names: string[]) => {
-      settingsStore.set('selectedProcesses', names);
+      store.set('selectedProcesses', names);
     });
 
     ipcMain.on(Channels.SET_STARTUP_ENABLED, (e, enabled: boolean) => {
-      settingsStore.set('settings.onStartup', enabled);
+      store.set('settings.onStartup', enabled);
 
       app.setLoginItemSettings({
         openAtLogin: enabled,
@@ -91,7 +91,7 @@ export class IpcController {
     });
 
     ipcMain.on(Channels.SET_START_MINIMIZED, (e, enabled: boolean) => {
-      settingsStore.set('settings.startMinimized', enabled);
+      store.set('settings.startMinimized', enabled);
     });
 
     ipcMain.on(Channels.DISABLE_KEYBINDINGS, () => {
@@ -109,7 +109,7 @@ export class IpcController {
     });
 
     ipcMain.on(Channels.RESET_STATS, () => {
-      settingsStore.set('stats', {});
+      store.set('stats', {});
 
       const { mainWindow } = this.mainWindowController;
 
@@ -117,7 +117,7 @@ export class IpcController {
         mainWindow.webContents.send(Channels.STATS_UPDATE, {
           type: 'FULL_UPDATE',
           payload: {
-            stats: settingsStore.get('stats'),
+            stats: store.get('stats'),
           },
         });
       }
