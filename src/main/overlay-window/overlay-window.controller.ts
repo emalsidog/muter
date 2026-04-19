@@ -1,5 +1,6 @@
-import { BrowserWindow, screen } from 'electron';
+import { BrowserWindow, screen, app } from 'electron';
 import crypto from 'crypto';
+import { exec } from 'child_process';
 
 import { getPreloadPath, resolveHtmlPath } from '../util';
 
@@ -34,7 +35,18 @@ export class OverlayWindowController {
     this.overlayWindow.setAlwaysOnTop(true, 'screen-saver');
     this.overlayWindow.loadURL(resolveHtmlPath('overlay.html'));
 
+    this.setHighPerformanceGpu();
     this.initListeners();
+  }
+
+  private setHighPerformanceGpu() {
+    try {
+      const exePath = app.getPath('exe');
+      const regKey = 'HKCU\\SOFTWARE\\Microsoft\\DirectX\\UserGpuPreferences';
+      exec(`reg add "${regKey}" /v "${exePath}" /t REG_SZ /d "GpuPreference=2;" /f`);
+    } catch {
+      
+    }
   }
 
   private initListeners() {

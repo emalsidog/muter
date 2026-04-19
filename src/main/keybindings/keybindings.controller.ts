@@ -61,13 +61,14 @@ export class KeybindingsController {
           if (selectedProcesses.includes(processName)) {
             this.muterApiController.muteProcess(process.pid);
 
-            let processTitle = process.product || process.processName;
+            let processTitle =
+              process.product || process.mainWindowTitle || process.processName;
 
             this.overlayWindowController.sendNotification({
               title: processTitle,
               description: `Toggled mute`,
               icon: process.icon,
-            })
+            });
 
             this.statsController().updateStats({
               processName,
@@ -103,13 +104,12 @@ export class KeybindingsController {
           const process = processes[activeProcess.processName];
           await this.muterApiController.muteProcess(process.pid);
 
-          const processToMute = processes[activeProcess.processName];
-
-          let processTitle = processToMute.product || processToMute.processName;
+          let processTitle =
+            process.product || process.mainWindowTitle || process.processName;
 
           this.statsController().updateStats({
-            processName: activeProcess.processName,
-            processIcon: processToMute.icon,
+            processName: process.processName,
+            processIcon: process.icon,
             processTitle,
           });
         }
