@@ -1,7 +1,7 @@
+import React from 'react';
 import {
   Stack,
   TableContainer,
-  Typography,
   Table,
   TableHead,
   TableRow,
@@ -20,6 +20,7 @@ import useAppState from 'renderer/main/contexts/app-state/useAppState';
 import Container from 'renderer/main/components/Container/Container';
 import ProcessIcon from 'renderer/common/components/ProcessIcon/ProcessIcon';
 import NoStats from './components/NoStats/NoStats';
+import PageHeading from '../../PageHeading/PageHeading';
 
 function Stats() {
   const { appState } = useAppState();
@@ -29,6 +30,25 @@ function Stats() {
   };
 
   const stats = Object.values(appState.stats);
+
+  const getHeadingActions = () => {
+    const actions: React.ReactNode[] = [];
+
+    if (stats.length) {
+      actions.push(
+        <Button
+          variant="outlined"
+          color="error"
+          style={{ textTransform: 'initial' }}
+          onClick={handleResetClick}
+        >
+          Reset
+        </Button>,
+      );
+    }
+
+    return actions;
+  };
 
   const renderContent = () => {
     if (!stats.length) {
@@ -74,22 +94,11 @@ function Stats() {
 
   return (
     <Stack flex={1} direction="column" gap="8px" sx={{ userSelect: 'none' }}>
-      <Stack direction="row" justifyContent="space-between">
-        <Typography variant="h5" fontWeight="bold">
-          Stats
-        </Typography>
-
-        {stats.length ? (
-          <Button
-            variant="outlined"
-            color="error"
-            style={{ textTransform: 'initial' }}
-            onClick={handleResetClick}
-          >
-            Reset
-          </Button>
-        ) : null}
-      </Stack>
+      <PageHeading
+        title="Stats"
+        subtitle="Tracks how many times you've toggled mute for each app. Sorted by most toggled."
+        actions={getHeadingActions()}
+      />
 
       <Container>{renderContent()}</Container>
     </Stack>

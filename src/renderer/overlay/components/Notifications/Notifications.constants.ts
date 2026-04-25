@@ -6,7 +6,7 @@ export const ANIMATION_CONFIGS: NotificationAnimationConfig = {
       initial: { x: '100%' },
       animate: { x: 0 },
       exit: {
-        x: '100%',
+        x: '110%',
         transition: { type: 'spring', bounce: 0, duration: 0.2 },
       },
     },
@@ -20,7 +20,7 @@ export const ANIMATION_CONFIGS: NotificationAnimationConfig = {
       initial: { x: '100%' },
       animate: { x: 0 },
       exit: {
-        x: '100%',
+        x: '110%',
         transition: { type: 'spring', bounce: 0, duration: 0.2 },
       },
     },
@@ -34,7 +34,7 @@ export const ANIMATION_CONFIGS: NotificationAnimationConfig = {
       initial: { x: '-100%' },
       animate: { x: 0 },
       exit: {
-        x: '-100%',
+        x: '-110%',
         transition: { type: 'spring', bounce: 0, duration: 0.2 },
       },
     },
@@ -48,7 +48,7 @@ export const ANIMATION_CONFIGS: NotificationAnimationConfig = {
       initial: { x: '-100%' },
       animate: { x: 0 },
       exit: {
-        x: '-100%',
+        x: '-110%',
         transition: { type: 'spring', bounce: 0, duration: 0.2 },
       },
     },

@@ -15,9 +15,11 @@ export interface AppSettings {
     muteCurrentActiveProcess: string;
   };
   overlay: {
+    enabled: boolean;
     notifications: {
       position: NotificationPosition;
       duration: number;
+      enabled: boolean;
     };
   };
 }

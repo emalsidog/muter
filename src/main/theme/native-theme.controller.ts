@@ -2,9 +2,10 @@ import { nativeTheme } from 'electron';
 
 import { store } from '../store';
 
-import { getTitleBarOverlayOptions } from '../util';
+import { getEffectiveTheme, getTitleBarOverlayOptions } from '../util';
 
 import { MainWindowController } from '../main-window/main-window.controller';
+import { Channels } from 'main/ipc/ipc.types';
 
 export class NativeThemeController {
   constructor(private mainWindowController: MainWindowController) {}
@@ -13,14 +14,19 @@ export class NativeThemeController {
     nativeTheme.on('updated', () => {
       const preferredTheme = store.get('settings').preferredTheme;
       const mainWindow = this.mainWindowController.mainWindow;
+      const effectiveTheme = getEffectiveTheme(preferredTheme);
 
       if (preferredTheme === 'system') {
-        // TODO
         const titleBarOverlayOptions =
-          getTitleBarOverlayOptions(preferredTheme);
+          getTitleBarOverlayOptions(effectiveTheme);
 
         mainWindow?.setTitleBarOverlay(titleBarOverlayOptions);
       }
+
+      mainWindow?.webContents.send(
+        Channels.EFFECTIVE_THEME_CHANGED,
+        effectiveTheme,
+      );
     });
   }
 }

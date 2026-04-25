@@ -2,6 +2,8 @@ import { BrowserWindow, screen, app } from 'electron';
 import crypto from 'crypto';
 import { exec } from 'child_process';
 
+import { store } from 'main/store';
+
 import { getPreloadPath, resolveHtmlPath } from '../util';
 
 import { Channels } from 'main/ipc/ipc.types';
@@ -43,10 +45,10 @@ export class OverlayWindowController {
     try {
       const exePath = app.getPath('exe');
       const regKey = 'HKCU\\SOFTWARE\\Microsoft\\DirectX\\UserGpuPreferences';
-      exec(`reg add "${regKey}" /v "${exePath}" /t REG_SZ /d "GpuPreference=2;" /f`);
-    } catch {
-      
-    }
+      exec(
+        `reg add "${regKey}" /v "${exePath}" /t REG_SZ /d "GpuPreference=2;" /f`,
+      );
+    } catch {}
   }
 
   private initListeners() {
@@ -60,13 +62,22 @@ export class OverlayWindowController {
     });
   }
 
+  destroy() {
+    if (this.overlayWindow) {
+      this.overlayWindow.destroy();
+      this.overlayWindow = null;
+    }
+  }
+
   sendNotification(notification: Omit<Notification, 'id'>) {
-    this.overlayWindow?.webContents.send(
-      Channels.OVERLAY_NOTIFICATION,
-      {
+    const overlayNotificationsEnabled =
+      store.get('settings').overlay.notifications.enabled;
+
+    if (overlayNotificationsEnabled) {
+      this.overlayWindow?.webContents.send(Channels.OVERLAY_NOTIFICATION, {
         id: crypto.randomUUID().toString(),
-        ...notification
-      },
-    );
+        ...notification,
+      });
+    }
   }
 }

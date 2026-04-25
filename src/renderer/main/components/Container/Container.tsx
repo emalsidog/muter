@@ -8,9 +8,10 @@ function Container({ children }: React.PropsWithChildren) {
 
   return (
     <Box
-      maxHeight={height - 172}
+      maxHeight={height - 200}
       height="100vh"
       sx={(theme) => ({
+        paddingRight: '12px',
         overflowY: 'auto',
         '&::-webkit-scrollbar': {
           width: 8,

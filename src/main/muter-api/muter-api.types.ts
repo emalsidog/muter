@@ -13,6 +13,7 @@ export interface MuterApiResponse {
 export interface MuterApiProcess {
   Id: number;
   ProcessName: string;
+  MainWindowTitle: string;
   Product: string;
   Icon: string;
   Muted: boolean;

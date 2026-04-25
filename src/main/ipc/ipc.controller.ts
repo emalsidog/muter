@@ -1,13 +1,14 @@
-import { app, ipcMain, nativeTheme } from 'electron';
+import { app, ipcMain } from 'electron';
 
 import { store } from '../store';
 
 import { AppStateController } from '../app-state/app-state.controller';
 import { MainWindowController } from '../main-window/main-window.controller';
 import { KeybindingsController } from '../keybindings/keybindings.controller';
+import { OverlayWindowController } from '../overlay-window/overlay-window.controller';
 
 import { Channels } from './ipc.types';
-import { PreferredTheme } from 'common/types';
+import { AppSettings, PreferredTheme } from 'common/types';
 
 import { getTitleBarOverlayOptions, getEffectiveTheme } from '../util';
 
@@ -16,7 +17,15 @@ export class IpcController {
     private appStateController: AppStateController,
     private mainWindowController: MainWindowController,
     private keybindingsController: KeybindingsController,
+    private overlayWindowController: OverlayWindowController,
   ) {}
+
+  private broadcastSettingsUpdate() {
+    this.overlayWindowController.overlayWindow?.webContents.send(
+      Channels.SETTINGS_UPDATED,
+      store.get('settings'),
+    );
+  }
 
   init() {
     ipcMain.handle(Channels.GET_SETTINGS, () => {
@@ -35,52 +44,52 @@ export class IpcController {
       return this.appStateController.get('processes');
     });
 
+    ipcMain.handle(Channels.GET_EFFECTIVE_THEME, () => {
+      const preferredTheme = store.get('settings').preferredTheme;
+      return getEffectiveTheme(preferredTheme);
+    });
+
     ipcMain.on(
       Channels.SET_MUTE_SELECTED_PROCESSES_KEYBINDING,
-      (e, newKey: string) => {
+      (_e, newKey: string) => {
         this.keybindingsController.unregisterMuteSelectedProcesses();
-
         store.set('settings.keybindings.muteSelectedProcesses', newKey);
-
         this.keybindingsController.registerMuteSelectedProcesses();
+        this.broadcastSettingsUpdate();
       },
     );
 
     ipcMain.on(
       Channels.SET_MUTE_CURRENT_ACTIVE_PROCESS_KEYBINDING,
-      (e, newKey: string) => {
+      (_e, newKey: string) => {
         this.keybindingsController.unregisterMuteCurrentActiveProcess();
-
-        store.set(
-          'settings.keybindings.muteCurrentActiveProcess',
-          newKey,
-        );
-
+        store.set('settings.keybindings.muteCurrentActiveProcess', newKey);
         this.keybindingsController.registerMuteCurrentActiveProcess();
+        this.broadcastSettingsUpdate();
       },
     );
 
     ipcMain.on(
       Channels.SET_PREFERRED_THEME,
-      (e, newPreferredTheme: PreferredTheme) => {
+      (_e, newPreferredTheme: PreferredTheme) => {
         store.set('settings.preferredTheme', newPreferredTheme);
 
         const effectiveTheme = getEffectiveTheme(newPreferredTheme);
-
         const titleBarOverlayOptions =
           getTitleBarOverlayOptions(effectiveTheme);
 
         this.mainWindowController.mainWindow?.setTitleBarOverlay(
           titleBarOverlayOptions,
         );
+        this.broadcastSettingsUpdate();
       },
     );
 
-    ipcMain.on(Channels.SET_SELECTED_PROCESSES, (e, names: string[]) => {
+    ipcMain.on(Channels.SET_SELECTED_PROCESSES, (_e, names: string[]) => {
       store.set('selectedProcesses', names);
     });
 
-    ipcMain.on(Channels.SET_STARTUP_ENABLED, (e, enabled: boolean) => {
+    ipcMain.on(Channels.SET_STARTUP_ENABLED, (_e, enabled: boolean) => {
       store.set('settings.onStartup', enabled);
 
       app.setLoginItemSettings({
@@ -88,10 +97,12 @@ export class IpcController {
         path: process.execPath,
         args: ['--hidden'],
       });
+      this.broadcastSettingsUpdate();
     });
 
-    ipcMain.on(Channels.SET_START_MINIMIZED, (e, enabled: boolean) => {
+    ipcMain.on(Channels.SET_START_MINIMIZED, (_e, enabled: boolean) => {
       store.set('settings.startMinimized', enabled);
+      this.broadcastSettingsUpdate();
     });
 
     ipcMain.on(Channels.DISABLE_KEYBINDINGS, () => {
@@ -122,5 +133,21 @@ export class IpcController {
         });
       }
     });
+
+    ipcMain.on(
+      Channels.SET_OVERLAY_SETTINGS,
+      (_e, params: AppSettings['overlay']) => {
+        const wasEnabled = store.get('settings').overlay.enabled;
+        store.set('settings.overlay', params);
+
+        if (params.enabled && !wasEnabled) {
+          this.overlayWindowController.create();
+        } else if (!params.enabled && wasEnabled) {
+          this.overlayWindowController.destroy();
+        }
+
+        this.broadcastSettingsUpdate();
+      },
+    );
   }
 }

@@ -12,6 +12,7 @@ export interface IAppSettingsContext {
   updatePreferredTheme: (newPreferredTheme: PreferredTheme) => void;
   updateOnStartup: (newOnStartup: boolean) => void;
   updateStartMinimized: (newStartMinimized: boolean) => void;
+  updateOverlaySettings: (params: AppSettings['overlay']) => void;
 }
 
 export const defaultValue: IAppSettingsContext = {
@@ -20,6 +21,7 @@ export const defaultValue: IAppSettingsContext = {
   updatePreferredTheme: () => {},
   updateOnStartup: () => {},
   updateStartMinimized: () => {},
+  updateOverlaySettings: () => {},
 };
 
 export const AppSettingsContext =

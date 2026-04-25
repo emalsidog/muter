@@ -89,6 +89,7 @@ export class MuterApiController {
       const mappedProcess: Process = {
         pid: process.Id,
         processName: process.ProcessName,
+        mainWindowTitle: process.MainWindowTitle,
         product: process.Product,
         icon: process.Icon,
         muted: process.Muted,

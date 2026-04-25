@@ -96,8 +96,28 @@ function AppSettingsProvider({ children }: PropsWithChildren) {
     [settings],
   );
 
+  const updateOverlaySettings = useCallback(
+    (params: AppSettings['overlay']) => {
+      set$settings({
+        ...settings,
+        overlay: params,
+      });
+
+      ipcRenderer.send(Channels.SET_OVERLAY_SETTINGS, params);
+    },
+
+    [settings],
+  );
+
   useEffect(() => {
     getSettings();
+
+    const unsubscribe = ipcRenderer.on(
+      Channels.SETTINGS_UPDATED,
+      (updated: AppSettings) => set$settings(updated),
+    );
+
+    return () => unsubscribe();
   }, []);
 
   const value = useMemo(
@@ -107,6 +127,7 @@ function AppSettingsProvider({ children }: PropsWithChildren) {
       updatePreferredTheme,
       updateOnStartup,
       updateStartMinimized,
+      updateOverlaySettings,
     }),
     [
       settings,
@@ -114,6 +135,7 @@ function AppSettingsProvider({ children }: PropsWithChildren) {
       updatePreferredTheme,
       updateOnStartup,
       updateStartMinimized,
+      updateOverlaySettings,
     ],
   );
 

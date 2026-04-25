@@ -6,6 +6,7 @@ import { MuterApiController } from 'main/muter-api/muter-api.controller';
 import { AppStateController } from 'main/app-state/app-state.controller';
 import { StatsController } from 'main/stats/stats.controller';
 import { OverlayWindowController } from 'main/overlay-window/overlay-window.controller';
+import { Process } from 'common/types';
 
 export class KeybindingsController {
   constructor(
@@ -57,24 +58,9 @@ export class KeybindingsController {
         const processes = this.appStateController.get('processes');
         const selectedProcesses = store.get('selectedProcesses');
 
-        Object.entries(processes).forEach(([processName, process]) => {
+        Object.entries(processes).forEach(async ([processName, process]) => {
           if (selectedProcesses.includes(processName)) {
-            this.muterApiController.muteProcess(process.pid);
-
-            let processTitle =
-              process.product || process.mainWindowTitle || process.processName;
-
-            this.overlayWindowController.sendNotification({
-              title: processTitle,
-              description: `Toggled mute`,
-              icon: process.icon,
-            });
-
-            this.statsController().updateStats({
-              processName,
-              processIcon: process.icon,
-              processTitle,
-            });
+            await this.mute(process);
           }
         });
       });
@@ -102,16 +88,7 @@ export class KeybindingsController {
 
         if (Object.keys(processes).includes(activeProcess.processName)) {
           const process = processes[activeProcess.processName];
-          await this.muterApiController.muteProcess(process.pid);
-
-          let processTitle =
-            process.product || process.mainWindowTitle || process.processName;
-
-          this.statsController().updateStats({
-            processName: process.processName,
-            processIcon: process.icon,
-            processTitle,
-          });
+          await this.mute(process);
         }
       });
     } catch (error) {
@@ -126,5 +103,27 @@ export class KeybindingsController {
 
   unregisterAll() {
     globalShortcut.unregisterAll();
+  }
+
+  private async mute(process: Process) {
+    const { pid, product, mainWindowTitle, processName, icon, muted } = process;
+
+    await this.muterApiController.muteProcess(pid);
+
+    process.muted = !muted;
+
+    let processTitle = product || mainWindowTitle || processName;
+
+    this.overlayWindowController.sendNotification({
+      title: processTitle,
+      description: process.muted ? 'Muted' : 'Unmuted',
+      icon,
+    });
+
+    this.statsController().updateStats({
+      processName,
+      processIcon: icon,
+      processTitle,
+    });
   }
 }

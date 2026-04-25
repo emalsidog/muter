@@ -46,6 +46,7 @@ export class AppController {
     this.appStateController,
     this.mainWindowController,
     this.keybindingsController,
+    this.overlayWindowController,
   );
 
   async init() {
@@ -58,7 +59,10 @@ export class AppController {
 
       await this.processesController.start();
 
-      this.overlayWindowController.create();
+      const settings = store.get('settings');
+      if (settings.overlay.enabled) {
+        this.overlayWindowController.create();
+      }
       this.keybindingsController.registerAll();
       this.ipcController.init();
       this.trayController.build();
