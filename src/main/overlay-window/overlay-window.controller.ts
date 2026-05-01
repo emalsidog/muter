@@ -33,7 +33,7 @@ export class OverlayWindowController {
       },
     });
 
-    this.overlayWindow.setIgnoreMouseEvents(true);
+    this.overlayWindow.setIgnoreMouseEvents(true, { forward: true });
     this.overlayWindow.setAlwaysOnTop(true, 'screen-saver');
     this.overlayWindow.loadURL(resolveHtmlPath('overlay.html'));
 

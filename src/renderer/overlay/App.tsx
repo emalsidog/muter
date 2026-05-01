@@ -1,9 +1,10 @@
 import { createTheme, ThemeProvider } from '@mui/material';
 
 import AppSettingsProvider from 'renderer/common/contexts/app-settings/provider';
+import NotificationsProvider from './contexts/notifications/provider';
 
 import Notifications from './components/Notifications/Notifications';
-import NotificationsProvider from './contexts/notifications/provider';
+import Clock from './components/Clock/Clock';
 
 const theme = createTheme({
   colorSchemes: {
@@ -20,6 +21,7 @@ export default function App() {
       <NotificationsProvider>
         <ThemeProvider theme={theme}>
           <Notifications />
+          <Clock />
         </ThemeProvider>
       </NotificationsProvider>
     </AppSettingsProvider>
