@@ -135,6 +135,17 @@ export class IpcController {
     });
 
     ipcMain.on(
+      Channels.REGISTER_OVERLAY_ELEMENT,
+      (_e, { id, bounds, clickable }) => {
+        this.overlayWindowController.registerElement(id, bounds, clickable);
+      },
+    );
+
+    ipcMain.on(Channels.UNREGISTER_OVERLAY_ELEMENT, (_e, id: string) => {
+      this.overlayWindowController.unregisterElement(id);
+    });
+
+    ipcMain.on(
       Channels.SET_OVERLAY_SETTINGS,
       (_e, params: AppSettings['overlay']) => {
         const wasEnabled = store.get('settings').overlay.enabled;

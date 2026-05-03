@@ -9,8 +9,14 @@ import { getPreloadPath, resolveHtmlPath } from '../util';
 import { Channels } from 'main/ipc/ipc.types';
 import type { Notification } from 'common/types';
 
+type ElementBounds = { x: number; y: number; width: number; height: number };
+type ElementRegistration = { bounds: ElementBounds; clickable: boolean };
+
 export class OverlayWindowController {
   overlayWindow: BrowserWindow | null = null;
+  private elements = new Map<string, ElementRegistration>();
+  private currentlyOverId: string | null = null;
+  private hoverPollInterval: ReturnType<typeof setInterval> | null = null;
 
   async create() {
     const { width, height } = screen.getPrimaryDisplay().bounds;
@@ -33,12 +39,89 @@ export class OverlayWindowController {
       },
     });
 
-    this.overlayWindow.setIgnoreMouseEvents(true, { forward: true });
+    this.overlayWindow.setIgnoreMouseEvents(true);
     this.overlayWindow.setAlwaysOnTop(true, 'screen-saver');
     this.overlayWindow.loadURL(resolveHtmlPath('overlay.html'));
 
     this.setHighPerformanceGpu();
+    this.startHoverPolling();
     this.initListeners();
+  }
+
+  registerElement(id: string, bounds: ElementBounds, clickable: boolean) {
+    this.elements.set(id, { bounds, clickable });
+  }
+
+  unregisterElement(id: string) {
+    this.elements.delete(id);
+    if (this.currentlyOverId === id) {
+      this.currentlyOverId = null;
+      this.overlayWindow?.setIgnoreMouseEvents(true);
+      this.overlayWindow?.webContents.send(Channels.OVERLAY_HOVER, {
+        id,
+        isHovered: false,
+      });
+    }
+  }
+
+  private startHoverPolling() {
+    this.hoverPollInterval = setInterval(() => {
+      if (!this.overlayWindow || this.elements.size === 0) return;
+
+      const { x, y } = screen.getCursorScreenPoint();
+
+      let foundId: string | null = null;
+      for (const [id, { bounds }] of this.elements) {
+        if (
+          x >= bounds.x &&
+          x <= bounds.x + bounds.width &&
+          y >= bounds.y &&
+          y <= bounds.y + bounds.height
+        ) {
+          foundId = id;
+          break;
+        }
+      }
+
+      if (foundId === this.currentlyOverId) {
+        return;
+      }
+
+      if (this.currentlyOverId) {
+        const prev = this.elements.get(this.currentlyOverId);
+
+        this.overlayWindow.webContents.send(Channels.OVERLAY_HOVER, {
+          id: this.currentlyOverId,
+          isHovered: false,
+        });
+
+        if (prev?.clickable) {
+          this.overlayWindow.setIgnoreMouseEvents(true);
+        }
+      }
+
+      if (foundId) {
+        const curr = this.elements.get(foundId)!;
+
+        this.overlayWindow.webContents.send(Channels.OVERLAY_HOVER, {
+          id: foundId,
+          isHovered: true,
+        });
+
+        if (curr.clickable) {
+          this.overlayWindow.setIgnoreMouseEvents(false);
+        }
+      }
+
+      this.currentlyOverId = foundId;
+    }, 16);
+  }
+
+  private stopHoverPolling() {
+    if (this.hoverPollInterval !== null) {
+      clearInterval(this.hoverPollInterval);
+      this.hoverPollInterval = null;
+    }
   }
 
   private setHighPerformanceGpu() {
@@ -63,6 +146,10 @@ export class OverlayWindowController {
   }
 
   destroy() {
+    this.stopHoverPolling();
+    this.elements.clear();
+    this.currentlyOverId = null;
+
     if (this.overlayWindow) {
       this.overlayWindow.destroy();
       this.overlayWindow = null;

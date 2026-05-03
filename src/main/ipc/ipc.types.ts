@@ -20,6 +20,9 @@ export enum Channels {
   SET_OVERLAY_SETTINGS = 'set-overlay-settings',
 
   OVERLAY_NOTIFICATION = 'overlay-notification',
+  REGISTER_OVERLAY_ELEMENT = 'register-overlay-element',
+  UNREGISTER_OVERLAY_ELEMENT = 'unregister-overlay-element',
+  OVERLAY_HOVER = 'overlay-hover',
   SETTINGS_UPDATED = 'settings-updated',
 
   EFFECTIVE_THEME_CHANGED = 'effective-theme-changed',

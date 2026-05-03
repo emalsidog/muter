@@ -1,9 +1,10 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { Box, Stack } from '@mui/material';
 import dayjs from 'dayjs';
 import type { Dayjs } from 'dayjs';
 
 import useAppSettings from 'renderer/common/contexts/app-settings/useAppSettings';
+import { useOverlayInteractive } from 'renderer/overlay/hooks/useOverlayInteractive';
 
 import DigitSlot from './components/DigitSlot/DigitSlot';
 
@@ -12,29 +13,13 @@ import { POSITION_CONFIG } from './Clock.constants';
 function Clock() {
   const { appSettings } = useAppSettings();
   const [currentTime, set$currentTime] = useState<Dayjs>(dayjs());
-  const [hovered, set$hovered] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
+  const { ref, hovered } = useOverlayInteractive<HTMLDivElement>();
 
   useEffect(() => {
     const intervalId = window.setInterval(() => {
       set$currentTime(dayjs());
     }, 1000);
     return () => window.clearInterval(intervalId);
-  }, []);
-
-  useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      if (!ref.current) return;
-      const { left, top, right, bottom } = ref.current.getBoundingClientRect();
-      set$hovered(
-        e.clientX >= left &&
-          e.clientX <= right &&
-          e.clientY >= top &&
-          e.clientY <= bottom,
-      );
-    };
-    window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
   }, []);
 
   const formatTime = () => {
