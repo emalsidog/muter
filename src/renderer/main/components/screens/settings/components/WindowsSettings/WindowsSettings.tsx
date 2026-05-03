@@ -3,10 +3,7 @@ import { Stack, Switch, Typography } from '@mui/material';
 
 import useAppSettings from 'renderer/common/contexts/app-settings/useAppSettings';
 
-import { useWindowSize } from 'renderer/common/hooks/useWindowSize';
-
 function WindowsSettings() {
-  const { width } = useWindowSize();
   const { appSettings, updateOnStartup, updateStartMinimized } =
     useAppSettings();
 
@@ -32,7 +29,7 @@ function WindowsSettings() {
           alignItems="center"
           justifyContent="space-between"
           gap="8px"
-          maxWidth={width < 1040 ? '100%' : '50%'}
+          maxWidth="100%"
           flex={1}
         >
           <Stack>
@@ -53,7 +50,7 @@ function WindowsSettings() {
           alignItems="center"
           justifyContent="space-between"
           gap="8px"
-          maxWidth={width < 1040 ? '100%' : '50%'}
+          width="100%"
           flex={1}
         >
           <Stack>

@@ -2,15 +2,12 @@ import { useState, useEffect, useRef } from 'react';
 import { Box, Stack } from '@mui/material';
 import dayjs from 'dayjs';
 import type { Dayjs } from 'dayjs';
-import localizedFormat from 'dayjs/plugin/localizedFormat';
 
 import useAppSettings from 'renderer/common/contexts/app-settings/useAppSettings';
 
 import DigitSlot from './components/DigitSlot/DigitSlot';
 
 import { POSITION_CONFIG } from './Clock.constants';
-
-dayjs.extend(localizedFormat);
 
 function Clock() {
   const { appSettings } = useAppSettings();
@@ -40,10 +37,25 @@ function Clock() {
     return () => window.removeEventListener('mousemove', handleMouseMove);
   }, []);
 
-  const h = currentTime.format('h');
-  const mm = currentTime.format('mm');
-  const ss = currentTime.format('ss');
-  const period = currentTime.format('A');
+  const formatTime = () => {
+    let h = currentTime.format('h');
+    const mm = currentTime.format('mm');
+    const ss = currentTime.format('ss');
+    const period = currentTime.format('A');
+
+    if (appSettings.overlay.clock.timeFormat === '24_HOUR') {
+      h = currentTime.format('H');
+    }
+
+    return {
+      h,
+      mm,
+      ss,
+      period,
+    };
+  };
+
+  const { h, mm, ss, period } = formatTime();
 
   const config = POSITION_CONFIG[appSettings.overlay.clock.position];
 
@@ -66,13 +78,22 @@ function Clock() {
         <DigitSlot char=":" id="sep1" />
         <DigitSlot char={mm[0]} id="m-tens" />
         <DigitSlot char={mm[1]} id="m-units" />
-        <DigitSlot char=":" id="sep2" />
-        <DigitSlot char={ss[0]} id="s-tens" />
-        <DigitSlot char={ss[1]} id="s-units" />
-        <DigitSlot char=" " id="space" />
-        <Box width="4px" />
-        <DigitSlot char={period[0]} id="period-0" />
-        <DigitSlot char={period[1]} id="period-1" />
+
+        {appSettings.overlay.clock.displaySeconds && (
+          <>
+            <DigitSlot char=":" id="sep2" />
+            <DigitSlot char={ss[0]} id="s-tens" />
+            <DigitSlot char={ss[1]} id="s-units" />
+          </>
+        )}
+
+        {appSettings.overlay.clock.timeFormat === '12_HOUR' && (
+          <>
+            <Box width="4px" />
+            <DigitSlot char={period[0]} id="period-0" />
+            <DigitSlot char={period[1]} id="period-1" />
+          </>
+        )}
       </Box>
     </Stack>
   );

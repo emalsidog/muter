@@ -11,7 +11,6 @@ import {
 import { ChangeEvent, useState } from 'react';
 
 import useAppSettings from 'renderer/common/contexts/app-settings/useAppSettings';
-import { useWindowSize } from 'renderer/common/hooks/useWindowSize';
 
 import type { NotificationPosition } from 'common/types';
 
@@ -22,7 +21,6 @@ import {
 } from './NotificationsSettings.constants';
 
 function NotificationsSettings() {
-  const { width } = useWindowSize();
   const { appSettings, updateOverlaySettings } = useAppSettings();
   const [durationInput, setDurationInput] = useState(
     String(appSettings.overlay.notifications.duration),
@@ -84,8 +82,6 @@ function NotificationsSettings() {
         alignItems="center"
         justifyContent="space-between"
         gap="8px"
-        maxWidth={width < 1040 ? '100%' : '50%'}
-        flex={1}
       >
         <Stack>
           <Typography color={overlayEnabled ? 'text.primary' : 'text.disabled'}>
@@ -103,7 +99,7 @@ function NotificationsSettings() {
         />
       </Stack>
 
-      <Stack gap="8px" maxWidth={width < 1040 ? '100%' : '50%'} flex={1}>
+      <Stack gap="8px">
         <Stack>
           <Typography
             color={
@@ -139,7 +135,7 @@ function NotificationsSettings() {
         </Select>
       </Stack>
 
-      <Stack gap="4px" maxWidth={width < 1040 ? '100%' : '50%'} flex={1}>
+      <Stack gap="4px">
         <Stack>
           <Typography
             color={

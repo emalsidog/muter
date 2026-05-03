@@ -44,7 +44,7 @@ function Appearance() {
         Appearance
       </Typography>
 
-      <Stack gap="8px" width="100%" flex={1}>
+      <Stack gap="8px">
         <Typography>Default Themes</Typography>
 
         <Stack

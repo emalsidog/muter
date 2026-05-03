@@ -8,6 +8,7 @@ import {
   TableCell,
   TableBody,
   Button,
+  Paper,
 } from '@mui/material';
 
 import { formatIsoDate } from 'renderer/main/utils/format-iso-data';
@@ -56,9 +57,9 @@ function Stats() {
     }
 
     return (
-      <TableContainer>
+      <TableContainer sx={{ borderRadius: '8px' }}>
         <Table size="medium">
-          <TableHead>
+          <TableHead component={Paper}>
             <TableRow>
               <TableCell sx={{ fontSize: '1rem' }}>Process</TableCell>
               <TableCell sx={{ fontSize: '1rem' }}>Total Toggles</TableCell>
@@ -100,7 +101,18 @@ function Stats() {
         actions={getHeadingActions()}
       />
 
-      <Container>{renderContent()}</Container>
+      <Container>
+        <Stack
+          gap="48px"
+          sx={{
+            maxWidth: { xs: '100%', lg: '50%' },
+            mx: 'auto',
+            width: '100%',
+          }}
+        >
+          {renderContent()}
+        </Stack>
+      </Container>
     </Stack>
   );
 }

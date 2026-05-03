@@ -37,7 +37,7 @@ export class MainWindowController {
       show: false,
       width: 1024,
       height: 728,
-      minWidth: 700,
+      minWidth: 800,
       minHeight: 350,
       icon: windowIcon,
       webPreferences: {

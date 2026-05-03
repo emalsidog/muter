@@ -4,6 +4,7 @@ import {
   ListItem,
   ListItemButton,
   ListItemText,
+  Stack,
   Typography,
 } from '@mui/material';
 
@@ -36,24 +37,33 @@ function ProcessItem({ process }: Props) {
         sx={{ pt: 0, pb: 0 }}
         onClick={() => updateSelectedProcesses(process.processName)}
       >
-        <Checkbox
-          edge="start"
-          checked={appState.selectedProcesses.includes(process.processName)}
-          tabIndex={-1}
-          disableRipple
-        />
+        <Stack
+          direction="row"
+          alignItems="center"
+          justifyContent="space-between"
+          width="100%"
+        >
+          <Stack direction="row" alignItems="center">
+            <ProcessIcon base64={process.icon} alt={process.processName} />
 
-        <ProcessIcon base64={process.icon} alt={process.processName} />
+            <ListItemText
+              primary={getPrimaryTitle()}
+              sx={{ ml: '12px' }}
+              slotProps={{
+                primary: {
+                  fontSize: '16px',
+                },
+              }}
+            />
+          </Stack>
 
-        <ListItemText
-          primary={getPrimaryTitle()}
-          sx={{ ml: '12px' }}
-          slotProps={{
-            primary: {
-              fontSize: '16px',
-            },
-          }}
-        />
+          <Checkbox
+            edge="start"
+            checked={appState.selectedProcesses.includes(process.processName)}
+            tabIndex={-1}
+            disableRipple
+          />
+        </Stack>
       </ListItemButton>
     </ListItem>
   );

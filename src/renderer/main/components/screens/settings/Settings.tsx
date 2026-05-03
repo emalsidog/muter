@@ -14,7 +14,14 @@ function Settings() {
       <PageHeading title="Settings" subtitle="Configure Muter behavior." />
 
       <Container>
-        <Stack gap="48px">
+        <Stack
+          gap="48px"
+          sx={{
+            maxWidth: { xs: '100%', lg: '50%' },
+            mx: 'auto',
+            width: '100%',
+          }}
+        >
           <Keybindings />
           <Appearance />
           <WindowsSettings />

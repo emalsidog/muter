@@ -39,13 +39,22 @@ function Processes() {
       />
 
       <Container>
-        <List dense sx={{ py: 0 }}>
-          {Object.values(processesList)
-            .sort((a, b) => Number(b.muted) - Number(a.muted))
-            .map((process) => (
-              <ProcessItem key={process.pid} process={process} />
-            ))}
-        </List>
+        <Stack
+          gap="48px"
+          sx={{
+            maxWidth: { xs: '100%', lg: '50%' },
+            mx: 'auto',
+            width: '100%',
+          }}
+        >
+          <List dense sx={{ py: 0 }}>
+            {Object.values(processesList)
+              .sort((a, b) => Number(b.muted) - Number(a.muted))
+              .map((process) => (
+                <ProcessItem key={process.pid} process={process} />
+              ))}
+          </List>
+        </Stack>
       </Container>
     </Stack>
   );

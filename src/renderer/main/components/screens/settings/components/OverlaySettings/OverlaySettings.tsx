@@ -2,13 +2,11 @@ import { Stack, Switch, Typography } from '@mui/material';
 import { ChangeEvent } from 'react';
 
 import useAppSettings from 'renderer/common/contexts/app-settings/useAppSettings';
-import { useWindowSize } from 'renderer/common/hooks/useWindowSize';
 
 import NotificationsSettings from './components/NotificationsSettings/NotificationsSettings';
 import ClockSettings from './components/ClockSettings/ClockSettings';
 
 function OverlaySettings() {
-  const { width } = useWindowSize();
   const { appSettings, updateOverlaySettings } = useAppSettings();
 
   const handleEnableOverlay = (e: ChangeEvent<HTMLInputElement>) => {
@@ -33,7 +31,7 @@ function OverlaySettings() {
         alignItems="center"
         justifyContent="space-between"
         gap="8px"
-        maxWidth={width < 1040 ? '100%' : '50%'}
+        maxWidth="100%"
         flex={1}
       >
         <Stack>

@@ -9,7 +9,7 @@ export const DEFAULT_APP_SETTINGS: AppSettings = {
     muteSelectedProcesses: 'F11',
   },
   overlay: {
-    enabled: true,
+    enabled: false,
     notifications: {
       position: 'TOP_RIGHT',
       duration: 1500,
@@ -18,6 +18,8 @@ export const DEFAULT_APP_SETTINGS: AppSettings = {
     clock: {
       position: 'TOP_LEFT',
       enabled: true,
+      displaySeconds: true,
+      timeFormat: '12_HOUR',
     },
   },
 };

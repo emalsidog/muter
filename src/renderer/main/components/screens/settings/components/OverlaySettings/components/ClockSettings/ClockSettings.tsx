@@ -9,14 +9,12 @@ import {
 import { ChangeEvent } from 'react';
 
 import useAppSettings from 'renderer/common/contexts/app-settings/useAppSettings';
-import { useWindowSize } from 'renderer/common/hooks/useWindowSize';
 
-import type { ClockPosition } from 'common/types';
+import type { ClockPosition, TimeFormat } from 'common/types';
 
-import { CLOCK_POSITIONS } from './ClockSettings.constants';
+import { CLOCK_POSITIONS, TIME_FORMAT } from './ClockSettings.constants';
 
 function ClockSettings() {
-  const { width } = useWindowSize();
   const { appSettings, updateOverlaySettings } = useAppSettings();
 
   const handleClockPositionChange = (event: SelectChangeEvent) => {
@@ -43,6 +41,30 @@ function ClockSettings() {
     });
   };
 
+  const handleDisplaySeconds = (e: ChangeEvent<HTMLInputElement>) => {
+    const { overlay } = appSettings;
+
+    updateOverlaySettings({
+      ...overlay,
+      clock: {
+        ...overlay.clock,
+        displaySeconds: e.target.checked,
+      },
+    });
+  };
+
+  const handleTimeFormatChange = (event: SelectChangeEvent) => {
+    const { overlay } = appSettings;
+
+    updateOverlaySettings({
+      ...overlay,
+      clock: {
+        ...overlay.clock,
+        timeFormat: event.target.value as TimeFormat,
+      },
+    });
+  };
+
   const clockEnabled = appSettings.overlay.clock.enabled;
   const overlayEnabled = appSettings.overlay.enabled;
 
@@ -57,8 +79,6 @@ function ClockSettings() {
         alignItems="center"
         justifyContent="space-between"
         gap="8px"
-        maxWidth={width < 1040 ? '100%' : '50%'}
-        flex={1}
       >
         <Stack>
           <Typography color={overlayEnabled ? 'text.primary' : 'text.disabled'}>
@@ -76,7 +96,67 @@ function ClockSettings() {
         />
       </Stack>
 
-      <Stack gap="8px" maxWidth={width < 1040 ? '100%' : '50%'} flex={1}>
+      <Stack
+        direction="row"
+        alignItems="center"
+        justifyContent="space-between"
+        gap="8px"
+      >
+        <Stack>
+          <Typography
+            color={
+              clockEnabled && overlayEnabled ? 'text.primary' : 'text.disabled'
+            }
+          >
+            Display seconds
+          </Typography>
+          <Typography color="textSecondary" variant="subtitle2">
+            Include seconds in the time display.
+          </Typography>
+        </Stack>
+
+        <Switch
+          checked={appSettings.overlay.clock.displaySeconds}
+          onChange={handleDisplaySeconds}
+          disabled={!clockEnabled || !overlayEnabled}
+        />
+      </Stack>
+
+      <Stack gap="8px">
+        <Stack>
+          <Typography
+            color={
+              clockEnabled && overlayEnabled ? 'text.primary' : 'text.disabled'
+            }
+          >
+            Time format
+          </Typography>
+          <Typography color="textSecondary" variant="subtitle2">
+            12-hour or 24-hour time notation.
+          </Typography>
+        </Stack>
+
+        <Select
+          disabled={!clockEnabled || !overlayEnabled}
+          value={appSettings.overlay.clock.timeFormat}
+          onChange={handleTimeFormatChange}
+          size="small"
+          sx={{
+            width: '100%',
+            '& .MuiOutlinedInput-notchedOutline': {
+              transition: 'border-color 0.15s ease-in-out',
+            },
+          }}
+        >
+          {TIME_FORMAT.map((format) => (
+            <MenuItem key={format.value} value={format.value}>
+              {format.label}
+            </MenuItem>
+          ))}
+        </Select>
+      </Stack>
+
+      <Stack gap="8px">
         <Stack>
           <Typography
             color={

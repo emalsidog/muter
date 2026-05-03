@@ -1,4 +1,4 @@
-import type { ClockPosition } from 'common/types';
+import type { ClockPosition, TimeFormat } from 'common/types';
 
 export const CLOCK_POSITIONS: {
   label: string;
@@ -19,5 +19,19 @@ export const CLOCK_POSITIONS: {
   {
     label: 'Top right',
     value: 'TOP_RIGHT',
+  },
+];
+
+export const TIME_FORMAT: {
+  label: string;
+  value: TimeFormat;
+}[] = [
+  {
+    label: '24 hour',
+    value: '24_HOUR',
+  },
+  {
+    label: '12 hour',
+    value: '12_HOUR',
   },
 ];

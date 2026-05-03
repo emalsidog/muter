@@ -12,6 +12,8 @@ export type ClockPosition =
   | 'TOP_LEFT'
   | 'BOTTOM_LEFT';
 
+export type TimeFormat = '24_HOUR' | '12_HOUR';
+
 export interface AppSettings {
   preferredTheme: PreferredTheme;
   onStartup: boolean;
@@ -30,6 +32,8 @@ export interface AppSettings {
     clock: {
       enabled: boolean;
       position: ClockPosition;
+      displaySeconds: boolean;
+      timeFormat: TimeFormat;
     };
   };
 }
