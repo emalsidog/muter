@@ -1,6 +1,6 @@
 import type { NotificationAnimationConfig } from './Notifications.types';
 
-export const ANIMATION_CONFIGS: NotificationAnimationConfig = {
+export const ANIMATION_CONFIG: NotificationAnimationConfig = {
   TOP_RIGHT: {
     framer: {
       initial: { x: '100%' },

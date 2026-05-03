@@ -4,11 +4,16 @@ import dayjs from 'dayjs';
 import type { Dayjs } from 'dayjs';
 import localizedFormat from 'dayjs/plugin/localizedFormat';
 
+import useAppSettings from 'renderer/common/contexts/app-settings/useAppSettings';
+
 import DigitSlot from './components/DigitSlot/DigitSlot';
+
+import { POSITION_CONFIG } from './Clock.constants';
 
 dayjs.extend(localizedFormat);
 
 function Clock() {
+  const { appSettings } = useAppSettings();
   const [currentTime, set$currentTime] = useState<Dayjs>(dayjs());
   const [hovered, set$hovered] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -40,22 +45,19 @@ function Clock() {
   const ss = currentTime.format('ss');
   const period = currentTime.format('A');
 
+  const config = POSITION_CONFIG[appSettings.overlay.clock.position];
+
   return (
     <Stack
       ref={ref}
       position="fixed"
-      top={0}
-      left={0}
       zIndex={-1}
       width="250px"
       padding="16px"
-      justifyContent="flex-start"
-      alignItems="flex-start"
       sx={{
-        background:
-          'radial-gradient(circle at top left, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.4) 20%, transparent 80%)',
         opacity: hovered ? 0 : 1,
         transition: 'opacity 0.4s ease-in-out',
+        ...config,
       }}
     >
       <Box sx={{ display: 'inline-flex', alignItems: 'center' }}>

@@ -6,13 +6,13 @@ import useNotifications from 'renderer/overlay/contexts/notifications/useNotific
 
 import Toast from './components/Toast/Toast';
 
-import { ANIMATION_CONFIGS } from './Notifications.constants';
+import { ANIMATION_CONFIG } from './Notifications.constants';
 
 function Notifications() {
   const { notifications } = useNotifications();
   const { appSettings } = useAppSettings();
 
-  const config = ANIMATION_CONFIGS[appSettings.overlay.notifications.position];
+  const config = ANIMATION_CONFIG[appSettings.overlay.notifications.position];
 
   return (
     <Stack
