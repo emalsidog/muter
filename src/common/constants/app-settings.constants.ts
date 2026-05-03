@@ -15,5 +15,9 @@ export const DEFAULT_APP_SETTINGS: AppSettings = {
       duration: 1500,
       enabled: true,
     },
+    clock: {
+      position: 'TOP_LEFT',
+      enabled: true,
+    },
   },
 };

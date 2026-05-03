@@ -54,7 +54,6 @@ function Clock() {
       sx={{
         background:
           'radial-gradient(circle at top left, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.4) 20%, transparent 80%)',
-
         opacity: hovered ? 0 : 1,
         transition: 'opacity 0.4s ease-in-out',
       }}

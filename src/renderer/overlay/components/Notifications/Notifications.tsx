@@ -12,8 +12,6 @@ function Notifications() {
   const { notifications } = useNotifications();
   const { appSettings } = useAppSettings();
 
-  console.log(appSettings.overlay.notifications.position);
-
   const config = ANIMATION_CONFIGS[appSettings.overlay.notifications.position];
 
   return (

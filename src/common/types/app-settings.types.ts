@@ -6,6 +6,12 @@ export type NotificationPosition =
   | 'TOP_LEFT'
   | 'BOTTOM_LEFT';
 
+export type ClockPosition =
+  | 'TOP_RIGHT'
+  | 'BOTTOM_RIGHT'
+  | 'TOP_LEFT'
+  | 'BOTTOM_LEFT';
+
 export interface AppSettings {
   preferredTheme: PreferredTheme;
   onStartup: boolean;
@@ -20,6 +26,10 @@ export interface AppSettings {
       position: NotificationPosition;
       duration: number;
       enabled: boolean;
+    };
+    clock: {
+      enabled: boolean;
+      position: ClockPosition;
     };
   };
 }
