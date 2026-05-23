@@ -112,7 +112,7 @@ export class KeybindingsController {
 
     process.muted = !muted;
 
-    let processTitle = product || mainWindowTitle || processName;
+    let processTitle = mainWindowTitle || product || processName;
 
     this.overlayWindowController.sendNotification({
       title: processTitle,
