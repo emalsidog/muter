@@ -1,9 +1,11 @@
 import { spawn } from 'child_process';
 import { randomUUID } from 'crypto';
 import readline from 'readline';
-// import { logger } from 'main/logger';
 
 import { getMuterApiPath } from './muter-api.util';
+
+import { OverlayWindowController } from 'main/overlay-window/overlay-window.controller';
+import { store } from 'main/store';
 
 import type { Process, ProcessesMap } from 'common/types';
 import type {
@@ -20,7 +22,7 @@ export class MuterApiController {
     stdio: ['pipe', 'pipe', 'pipe'],
   });
 
-  constructor() {
+  constructor(private overlayWindowController: OverlayWindowController) {
     const rl = readline.createInterface({
       input: this.muterApiProcess.stdout,
       terminal: false,
@@ -37,6 +39,18 @@ export class MuterApiController {
         if (requestResolveFunction) {
           requestResolveFunction(response.Data);
           this.pendingRequests.delete(response.RequestId);
+          return;
+        }
+
+        const notificationsEnabled =
+          store.get('settings').overlay.notifications.enabled;
+
+        if (response.Action === 'MEDIA_UPDATE' && notificationsEnabled) {
+          this.overlayWindowController.sendNotification({
+            title: response.Data.title,
+            description: response.Data.artist,
+            icon: response.Data.thumbnail,
+          });
         }
       } catch (error) {
         console.error('MuterApi JSON Parse Error:', error);
@@ -103,5 +117,9 @@ export class MuterApiController {
 
   async muteProcess(processPid: number): Promise<void> {
     await this.sendCommand(`MUTE_PROCESS ${processPid}`);
+  }
+
+  async subscribeToMedia(): Promise<void> {
+    await this.sendCommand('SUBSCRIBE_MEDIA');
   }
 }

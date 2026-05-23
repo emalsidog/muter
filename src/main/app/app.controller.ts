@@ -15,8 +15,10 @@ import { store } from '../store';
 
 export class AppController {
   private appStateController = new AppStateController();
-  private muterApiController = new MuterApiController();
   private overlayWindowController = new OverlayWindowController();
+  private muterApiController = new MuterApiController(
+    this.overlayWindowController,
+  );
   private keybindingsController = new KeybindingsController(
     this.appStateController,
     this.muterApiController,
@@ -56,8 +58,8 @@ export class AppController {
 
     try {
       await app.whenReady();
-
       await this.processesController.start();
+      await this.muterApiController.subscribeToMedia();
 
       const settings = store.get('settings');
       if (settings.overlay.enabled) {

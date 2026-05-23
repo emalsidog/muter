@@ -3,14 +3,15 @@ import crypto from 'crypto';
 import { exec } from 'child_process';
 
 import { store } from 'main/store';
+import { Channels } from 'main/ipc/ipc.types';
 
 import { getPreloadPath, resolveHtmlPath } from '../util';
 
-import { Channels } from 'main/ipc/ipc.types';
 import type { Notification } from 'common/types';
-
-type ElementBounds = { x: number; y: number; width: number; height: number };
-type ElementRegistration = { bounds: ElementBounds; clickable: boolean };
+import type {
+  ElementBounds,
+  ElementRegistration,
+} from './overlay-window.types';
 
 export class OverlayWindowController {
   overlayWindow: BrowserWindow | null = null;

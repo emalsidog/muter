@@ -16,14 +16,18 @@ function Toast({ notification }: Props) {
       gap="12px"
       py="6px"
       px="12px"
+      maxWidth={150}
+      minWidth={150}
     >
       {notification.icon && (
         <ProcessIcon base64={notification.icon} alt={notification.title} />
       )}
 
-      <Stack flexDirection="column">
-        <Typography color="textPrimary">{notification.title}</Typography>
-        <Typography color="textSecondary" variant="caption">
+      <Stack flexDirection="column" minWidth={0}>
+        <Typography color="textPrimary" noWrap>
+          {notification.title}
+        </Typography>
+        <Typography color="textSecondary" variant="caption" noWrap>
           {notification.description}
         </Typography>
       </Stack>
