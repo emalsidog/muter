@@ -91,7 +91,6 @@
     "@emotion/styled": "^11.14.1",
     "@mui/icons-material": "^7.3.4",
     "@mui/material": "^7.3.4",
-    "@mui/x-data-grid": "^8.28.2",
     "dayjs": "^1.11.20",
     "electron-debug": "^4.1.0",
     "electron-log": "^5.4.3",
